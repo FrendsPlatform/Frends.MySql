@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 #pragma warning disable 1591
 
-namespace Frends.Community.MySql
+namespace Frends.MySql
 {
     public enum QueryReturnType { Json, Xml, Csv };
 
@@ -207,6 +207,7 @@ namespace Frends.Community.MySql
         [DisplayFormat(DataFormatString = "Text")]
         [DefaultValue("c:\\temp\\output.csv")]
         public string Path { get; set; }
+
 
         /// <summary>
         /// Output file encoding

@@ -13,7 +13,7 @@ using MySql.Data;
 using MySql.Data.MySqlClient;
 using MySql.Data.Types;
 
-namespace Frends.Community.MySql
+namespace Frends.MySql
 {
     static class Extensions
     {
@@ -86,6 +86,7 @@ namespace Frends.Community.MySql
         public static async Task<string> ToJsonAsync(this MySqlCommand command, QueryOutputProperties output, CancellationToken cancellationToken)
         {
             command.CommandType = CommandType.Text;
+            
 
             using (MySqlDataReader reader = await command.ExecuteReaderAsync(cancellationToken) as MySqlDataReader)
             {
@@ -93,6 +94,12 @@ namespace Frends.Community.MySql
 
                 // utf-8 as default encoding
                 Encoding encoding = string.IsNullOrWhiteSpace(output.OutputFile?.Encoding) ? Encoding.UTF8 : Encoding.GetEncoding(output.OutputFile.Encoding);
+
+                if(output.OutputFile == null)
+                {
+                   // Idea is that if outputfile is null, put something default in it so it's not null anymore
+                   // output.OutputFile = defaultFileName;
+                }
 
                 // create json result
                 using (var fileWriter = output.OutputToFile ? new StreamWriter(output.OutputFile.Path, false, encoding) : null)

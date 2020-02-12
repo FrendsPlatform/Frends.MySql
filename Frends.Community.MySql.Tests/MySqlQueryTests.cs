@@ -4,9 +4,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
-using Frends.Community.MySql;
+using Frends.MySql;
 
-namespace Frends.Community.MySql.Tests
+namespace Frends.MySql.Tests
 {
     /// <summary>
     /// THESE TESTS DO NOT WORK UNLESS YOU INSTALL MySql LOCALLY ON YOUR OWN COMPUTER!
@@ -83,7 +83,7 @@ namespace Frends.Community.MySql.Tests
             };
             var options = new Options { ThrowErrorOnFailure = true };
 
-            Output result = await MySqls.QueryTask.Query(q, o, _conn, options, new CancellationToken());
+            Output result = await MySql.QueryTask.Query(q, o, _conn, options, new CancellationToken());
 
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <items>
@@ -119,7 +119,7 @@ namespace Frends.Community.MySql.Tests
             };
             var options = new Options { ThrowErrorOnFailure = true };
 
-            Output result = await MySqls.QueryTask.Query(q, o, _conn, options, new CancellationToken());
+            Output result = await MySql.QueryTask.Query(q, o, _conn, options, new CancellationToken());
 
             Assert.IsTrue(File.Exists(result.Result), "should have created xml output file");
             Assert.AreEqual(
@@ -153,7 +153,7 @@ namespace Frends.Community.MySql.Tests
             };
             var options = new Options { ThrowErrorOnFailure = true };
 
-            Output result = await MySqls.QueryTask.Query(queryProperties, outputProperties, _conn, options, new CancellationToken());
+            Output result = await MySql.QueryTask.Query(queryProperties, outputProperties, _conn, options, new CancellationToken());
 
             Assert.AreNotEqual("", result.Result);
             Assert.AreEqual(true, result.Success);
@@ -172,7 +172,7 @@ namespace Frends.Community.MySql.Tests
             };
             var options = new Options { ThrowErrorOnFailure = true };
 
-            Output result = await MySqls.QueryTask.Query(q, o, _conn, options, new CancellationToken());
+            Output result = await MySql.QueryTask.Query(q, o, _conn, options, new CancellationToken());
 
             Assert.IsTrue(string.Equals(result.Result, @"[
   {
@@ -203,7 +203,7 @@ namespace Frends.Community.MySql.Tests
             };
             var options = new Options { ThrowErrorOnFailure = true };
 
-            Output result = await MySqls.QueryTask.Query(q, o, _conn, options, new CancellationToken());
+            Output result = await MySql.QueryTask.Query(q, o, _conn, options, new CancellationToken());
 
             Assert.IsTrue(File.Exists(result.Result), "should have created json outputfile");
             Assert.AreEqual(@"[
@@ -236,7 +236,7 @@ namespace Frends.Community.MySql.Tests
             };
             var options = new Options { ThrowErrorOnFailure = true };
 
-            Output result = await MySqls.QueryTask.Query(q, o, _conn, options, new CancellationToken());
+            Output result = await MySql.QueryTask.Query(q, o, _conn, options, new CancellationToken());
 
             StringAssert.IsMatch(result.Result, "name;value\r\nhodor;123\r\njon;321\r\n");
         }
@@ -262,7 +262,7 @@ namespace Frends.Community.MySql.Tests
             };
             var options = new Options { ThrowErrorOnFailure = true };
 
-            Output result = await MySqls.QueryTask.Query(q, o, _conn, options, new CancellationToken());
+            Output result = await MySql.QueryTask.Query(q, o, _conn, options, new CancellationToken());
 
             Assert.IsTrue(File.Exists(result.Result), "should have created csv output file");
             File.Delete(result.Result);

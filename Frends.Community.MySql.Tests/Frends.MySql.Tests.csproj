@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Frends.Community.MySql\Frends.Community.MySql.csproj" />
+    <ProjectReference Include="..\Frends.Community.MySql\Frends.MySql.csproj" />
   </ItemGroup>
 
 </Project>

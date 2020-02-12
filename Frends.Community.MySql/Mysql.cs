@@ -12,13 +12,11 @@ using MySql;
 using MySql.Data;
 using MySql.Data.MySqlClient;
 
-namespace Frends.Community.MySql
+namespace Frends.MySql
 {
-    /// <summary>
-    /// Task for performing queries in MySql databases. See documentation at https://github.com/CommunityHiQ/Frends.Community.MySQL
-    /// </summary>
-    public class MySqls
-    {
+        /// <summary>
+        /// Example task package for handling files
+        /// </summary>
         public class QueryTask
         {
             /// <summary>
@@ -101,7 +99,10 @@ namespace Frends.Community.MySql
                 }
             }
 
-            public static MySqlParameter CreateMySqlParameter(QueryParameter parameter)
+            /// <summary>
+            /// Mysql parameters.
+            /// </summary>
+            private static MySqlParameter CreateMySqlParameter(QueryParameter parameter)
             {
                 return new MySqlParameter()
                 {
@@ -113,5 +114,4 @@ namespace Frends.Community.MySql
 
 
         }
-    }
 }
