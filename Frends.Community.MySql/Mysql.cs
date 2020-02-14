@@ -1,36 +1,33 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Data;
-using System.IO;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.ComponentModel;
-using MySql;
-using MySql.Data;
+using System.Data;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Frends.MySql
 {
         /// <summary>
         /// Example task package for handling files
         /// </summary>
-        public class QueryTask
+        public static class QueryTask
         {
             /// <summary>
             /// Task for performing queries in Oracle databases. See documentation at https://github.com/CommunityHiQ/Frends.Community.Oracle.Query
             /// </summary>
             /// <param name="query"></param>
-            /// <param name="output"></param>
             /// <param name="connection"></param>
             /// <param name="options"></param>
             /// <param name="cancellationToken"></param>
-            /// <returns>Object { bool Success, string Message, string Result }</returns>
+            /// <returns>Object { bool Success, string Message, Jtoken Result }</returns>
             public static async Task<Output> Query(
                 [PropertyTab] QueryProperties query,
-                [PropertyTab] QueryOutputProperties output,
                 [PropertyTab] ConnectionProperties connection,
                 [PropertyTab] Options options,
                 CancellationToken cancellationToken)
@@ -53,8 +50,18 @@ namespace Frends.MySql
                                     command.Parameters.AddRange(query.Parameters.Select(p => CreateMySqlParameter(p)).ToArray());
 
                                 // declare Result object
-                                string queryResult;
 
+                                command.CommandType = CommandType.Text;
+
+
+
+
+                                var queryResult = await command.ToJtokenAsync(cancellationToken);
+                                    return new Output { Success = true, Result = queryResult };
+
+                            
+
+                            /*
                                 // set commandType according to ReturnType
                                 switch (output.ReturnType)
                                 {
@@ -72,7 +79,10 @@ namespace Frends.MySql
                                 }
 
                                 return new Output { Success = true, Result = queryResult };
-                            }
+
+    */
+                        }
+                        
                         }
                         catch (Exception ex)
                         {
@@ -99,10 +109,62 @@ namespace Frends.MySql
                 }
             }
 
-            /// <summary>
-            /// Mysql parameters.
-            /// </summary>
-            private static MySqlParameter CreateMySqlParameter(QueryParameter parameter)
+
+        /// <summary>
+        /// Write query results to json string or file
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="output"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private static async Task<JToken> ToJtokenAsync(this MySqlCommand command, CancellationToken cancellationToken)
+        {
+            command.CommandType = CommandType.Text;
+
+
+            using (var reader = await command.ExecuteReaderAsync(cancellationToken) as MySqlDataReader)
+            {
+                var culture = CultureInfo.InvariantCulture;
+
+                using (var writer = new JTokenWriter() as JsonWriter)
+                {
+                    // start array
+                    await writer.WriteStartArrayAsync(cancellationToken);
+
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    while (reader != null && reader.Read())
+                    {
+                        // start row object
+                        await writer.WriteStartObjectAsync(cancellationToken);
+
+                        for (var i = 0; i < reader.FieldCount; i++)
+                        {
+                            // add row element name
+                            await writer.WritePropertyNameAsync(reader.GetName(i), cancellationToken);
+
+                            await writer.WriteValueAsync(reader.GetValue(i) ?? string.Empty, cancellationToken);
+
+                            cancellationToken.ThrowIfCancellationRequested();
+                        }
+
+                        await writer.WriteEndObjectAsync(cancellationToken); // end row object
+
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+
+                    // end array
+                    await writer.WriteEndArrayAsync(cancellationToken);
+
+                        return ((JTokenWriter)writer).Token;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Mysql parameters.
+        /// </summary>
+        private static MySqlParameter CreateMySqlParameter(QueryParameter parameter)
             {
                 return new MySqlParameter()
                 {
