@@ -18,10 +18,20 @@ namespace Frends.MySql
 {
     static class Extensions
     {
-        public static TEnum ConvertEnum<TEnum>(this Enum source)
+        internal static TEnum ConvertEnum<TEnum>(this Enum source)
         {
             return (TEnum)Enum.Parse(typeof(TEnum), source.ToString(), true);
         }
 
+
+        internal static IsolationLevel GetMySqlTransactionIsolationLevel(this MySqlTransactionIsolationLevel MysqlTransactionIsolationLevel)
+        {
+            return GetEnum<IsolationLevel>(MysqlTransactionIsolationLevel);
+        }
+
+        private static T GetEnum<T>(Enum enumValue)
+        {
+            return (T)Enum.Parse(typeof(T), enumValue.ToString());
+        }
     }
 }

@@ -5,34 +5,23 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Frends.MySql
 {
-    /// <summary>
-    /// Enumerator representing mysql parameter data types
-    /// </summary>
-    public enum QueryParameterType
-    {
-        NVARCHAR,
-        VARCHAR,
-        NCHAR,
-        CHAR,
-        Int16,
-        Int32,
-        Int64,
-        DOUBLE,
-        DECIMAL,
-        LONG,
-        BOOLEAN,
-        DATE,
-        TIMESTAMP,
-        BIT,
-        REAL,
-        LONGBLOB,
-        BYTE,
-        MEDIUMTEXT,
-        RefCursor
-    }
 
-    public class QueryProperties
+    public enum MySqlCommandType { Text = 1, StoredProcedure = 4 }
+
+    public enum MySqlTransactionIsolationLevel { Default, ReadCommitted, None, Serializable, ReadUncommitted, RepeatableRead}
+    public class InputQuery
     {
+
+        /// <summary>
+        /// Mysql connection string
+        /// </summary>
+        [PasswordPropertyText]
+        [DefaultValue("server=server;user=user;database=db;password=pw;")]
+        public string ConnectionString { get; set; }
+
+        /// <summary>
+        /// Querry 
+        /// </summary>
         [DisplayFormat(DataFormatString = "Sql")]
         [DefaultValue("SELECT ColumnName FROM TableName")]
         public string Query { get; set; }
@@ -40,10 +29,32 @@ namespace Frends.MySql
         /// <summary>
         /// Parameters for the database query
         /// </summary>
-        public QueryParameter[] Parameters { get; set; }
+        public Parameter[] Parameters { get; set; }
     }
 
-    public class QueryParameter
+    public class InputProcedure
+    {
+
+        /// <summary>
+        /// Mysql connection string
+        /// </summary>
+        [PasswordPropertyText]
+        [DefaultValue("server=server;user=user;database=db;password=pw;")]
+        public string ConnectionString { get; set; }
+        /// <summary>
+        /// Querry 
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Sql")]
+        [DefaultValue("SELECT ColumnName FROM TableName")]
+        public string Execute { get; set; }
+
+        /// <summary>
+        /// Parameters for the database query
+        /// </summary>
+        public Parameter[] Parameters { get; set; }
+    }
+
+    public class Parameter
     {
         /// <summary>
         /// The name of the parameter
@@ -59,43 +70,34 @@ namespace Frends.MySql
         [DisplayFormat(DataFormatString = "Text")]
         public dynamic Value { get; set; }
 
-        /// <summary>
-        /// The type of the parameter
-        /// </summary>
-        [DefaultValue(QueryParameterType.NVARCHAR)]
-        public QueryParameterType DataType { get; set; }
     }
 
-    public class ConnectionProperties
+
+    public class Options
     {
-        /// <summary>
-        /// Mysql connection string
-        /// </summary>
-        [PasswordPropertyText]
-        [DefaultValue("server=server;user=user;database=db;password=pw;")]
-        public string ConnectionString { get; set; }
 
         /// <summary>
         /// Timeout value in seconds
         /// </summary>
         [DefaultValue(30)]
         public int TimeoutSeconds { get; set; }
-    }
 
-    public class Options
-    {
+
         /// <summary>
         /// Choose if error should be thrown if Task failes.
         /// Otherwise returns Object {Success = false }
         /// </summary>
         [DefaultValue(true)]
         public bool ThrowErrorOnFailure { get; set; }
+
+        public MySqlTransactionIsolationLevel MySqlTransactionIsolationLevel;
+
     }
 
     /// <summary>
     /// Result to be returned from task
     /// </summary>
-    public class Output
+    public class QueryOutput
     {
         public bool Success { get; set; }
         public string Message { get; set; }

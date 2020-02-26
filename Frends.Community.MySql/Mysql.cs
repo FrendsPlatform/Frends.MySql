@@ -1,12 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Data;
-using System.Globalization;
-using System.IO;
-using System.Text;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -22,71 +20,107 @@ namespace Frends.MySql
             /// Task for performing queries in Oracle databases. See documentation at https://github.com/CommunityHiQ/Frends.Community.Oracle.Query
             /// </summary>
             /// <param name="query"></param>
-            /// <param name="connection"></param>
             /// <param name="options"></param>
             /// <param name="cancellationToken"></param>
-            /// <returns>Object { bool Success, string Message, Jtoken Result }</returns>
-            public static async Task<Output> Query(
-                [PropertyTab] QueryProperties query,
-                [PropertyTab] ConnectionProperties connection,
+            /// <returns>Object { bool Success, string Message, JToken Result }</returns>
+            public static async Task<QueryOutput> Query(
+                [PropertyTab]InputQuery query,
                 [PropertyTab] Options options,
+                CancellationToken cancellationToken)
+            {
+                return await GetMySqlCommandResult(query.Query, query.ConnectionString, query.Parameters, options, MySqlCommandType.Text, cancellationToken);
+            }
+
+            public static async Task<QueryOutput> ExecuteStoredProcedure(
+                [PropertyTab]InputProcedure execute,
+                [PropertyTab] Options options,
+                CancellationToken cancellationToken)
+            {
+                return await GetMySqlCommandResult(execute.Execute, execute.ConnectionString, execute.Parameters, options, MySqlCommandType.StoredProcedure, cancellationToken);
+            }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security",
+                "CA2100:Review SQL queries for security vulnerabilities", Justification =
+                    "One is able to write quereis in FRENDS. It is up to a FRENDS process prevent injections.")]
+            private static async Task<QueryOutput> GetMySqlCommandResult(
+                string query, string connectionString, IEnumerable<Parameter> parameters,
+                Options options, 
+                MySqlCommandType commandType, 
                 CancellationToken cancellationToken)
             {
                 try
                 {
-                    using (var c = new MySqlConnection(connection.ConnectionString))
+                    using (var c = new MySqlConnection(connectionString))
                     {
                         try
                         {
                             await c.OpenAsync(cancellationToken);
 
-                            using (var command = new MySqlCommand(query.Query, c))
+                            using (var command = new MySqlCommand(query, c))
                             {
-                                command.CommandTimeout = connection.TimeoutSeconds;
-                                //command.BindByNew = true; // is this xmlCommand specific?
+                                command.CommandTimeout = options.TimeoutSeconds;
 
                                 // check for command parameters and set them
-                                if (query.Parameters != null)
-                                    command.Parameters.AddRange(query.Parameters.Select(p => CreateMySqlParameter(p)).ToArray());
+                                if (parameters != null)
+                                    command.Parameters.AddRange(parameters.Select(CreateMySqlParameter)
+                                        .ToArray());
 
-                                // declare Result object
-
-                                command.CommandType = CommandType.Text;
-
-
-
-
-                                var queryResult = await command.ToJtokenAsync(cancellationToken);
-                                    return new Output { Success = true, Result = queryResult };
-
-                            
-
-                            /*
-                                // set commandType according to ReturnType
-                                switch (output.ReturnType)
+                                else if (commandType == MySqlCommandType.Text)
                                 {
-                                    case QueryReturnType.Xml:
-                                        queryResult = await command.ToXmlAsync(output, cancellationToken);
-                                        break;
-                                    case QueryReturnType.Json:
-                                        queryResult = await command.ToJsonAsync(output, cancellationToken);
-                                        break;
-                                    case QueryReturnType.Csv:
-                                        queryResult = await command.ToCsvAsync(output, cancellationToken);
-                                        break;
-                                    default:
-                                        throw new ArgumentException("Task 'Return Type' was invalid! Check task properties.");
+                                    command.CommandType = CommandType.Text;
+
+                                }
+                                else if (commandType == MySqlCommandType.Text)
+                                {
+                                    command.CommandType = CommandType.StoredProcedure;
                                 }
 
-                                return new Output { Success = true, Result = queryResult };
+                                if (options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.None)
+                                {
+                                    // declare Result object
+                                    var queryResult = await command.ToJTokenAsync(cancellationToken);
+                                    return new QueryOutput {Success = true, Result = queryResult};
+                                }
 
-    */
-                        }
-                        
-                        }
-                        catch (Exception ex)
-                        {
-                            throw ex;
+                                else
+                                {
+                                    var transaction =
+                                        options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.Default
+                                            ? c.BeginTransaction()
+                                            : c.BeginTransaction(options.MySqlTransactionIsolationLevel
+                                                .GetMySqlTransactionIsolationLevel());
+
+                                    command.Transaction = transaction;
+
+                                    // declare Result object
+                                    try
+                                    {
+                                        var queryResult = await command.ToJTokenAsync(cancellationToken);
+                                        return new QueryOutput {Success = true, Result = queryResult};
+
+                                    }
+                                    catch (MySqlException ex)
+                                    {
+                                        try
+                                        {
+                                            transaction.Rollback();
+                                        }
+                                        catch
+                                        {
+                                            if (transaction.Connection != null)
+                                            {
+
+                                                throw new Exception("An exception of type " + ex.GetType() +
+                                                " was encountered while attempting to roll back the transaction. Some data might be modified in the database.");
+                                            }
+
+                                            throw;
+                                        }
+                                        throw;
+                                    }
+                                }
+                            }
+
                         }
                         finally
                         {
@@ -100,8 +134,8 @@ namespace Frends.MySql
                 catch (Exception ex)
                 {
                     if (options.ThrowErrorOnFailure)
-                        throw ex;
-                    return new Output
+                        throw;
+                    return new QueryOutput
                     {
                         Success = false,
                         Message = ex.Message
@@ -109,29 +143,14 @@ namespace Frends.MySql
                 }
             }
 
-
-        /// <summary>
-        /// Write query results to json string or file
-        /// </summary>
-        /// <param name="command"></param>
-        /// <param name="output"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private static async Task<JToken> ToJtokenAsync(this MySqlCommand command, CancellationToken cancellationToken)
+        private static async Task<JToken> ToJTokenAsync(this MySqlCommand command , CancellationToken cancellationToken)
         {
-            command.CommandType = CommandType.Text;
-
-
             using (var reader = await command.ExecuteReaderAsync(cancellationToken) as MySqlDataReader)
             {
-                var culture = CultureInfo.InvariantCulture;
-
                 using (var writer = new JTokenWriter() as JsonWriter)
                 {
                     // start array
                     await writer.WriteStartArrayAsync(cancellationToken);
-
-                    cancellationToken.ThrowIfCancellationRequested();
 
                     while (reader != null && reader.Read())
                     {
@@ -142,21 +161,14 @@ namespace Frends.MySql
                         {
                             // add row element name
                             await writer.WritePropertyNameAsync(reader.GetName(i), cancellationToken);
-
                             await writer.WriteValueAsync(reader.GetValue(i) ?? string.Empty, cancellationToken);
-
-                            cancellationToken.ThrowIfCancellationRequested();
                         }
-
                         await writer.WriteEndObjectAsync(cancellationToken); // end row object
-
-                        cancellationToken.ThrowIfCancellationRequested();
                     }
-
                     // end array
                     await writer.WriteEndArrayAsync(cancellationToken);
 
-                        return ((JTokenWriter)writer).Token;
+                    return ((JTokenWriter)writer).Token;
                 }
             }
         }
@@ -164,16 +176,13 @@ namespace Frends.MySql
         /// <summary>
         /// Mysql parameters.
         /// </summary>
-        private static MySqlParameter CreateMySqlParameter(QueryParameter parameter)
+        private static MySqlParameter CreateMySqlParameter(Parameter parameter)
             {
                 return new MySqlParameter()
                 {
                     ParameterName = parameter.Name,
-                    Value = parameter.Value,
-                    MySqlDbType = parameter.DataType.ConvertEnum<MySqlDbType>()
+                    Value = parameter.Value
                 };
             }
-
-
         }
 }

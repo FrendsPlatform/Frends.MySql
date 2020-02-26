@@ -14,19 +14,18 @@ namespace Frends.MySql.Tests
     {
         // Problems with local MySql, tests not implemented yet
 
-        ConnectionProperties _conn = new ConnectionProperties
+        private string connectionString = "server=localhost;uid=root;pwd=pw;database=test;";
+
+        Options options = new Options
         {
-            ConnectionString = "server=localhost;uid=root;pwd=pw;database=test;",
             TimeoutSeconds = 300
         };
 
-
-        
         //[OneTimeSetUp]
         [Test, Order(1)]
         public async Task OneTimeSetUp()
         {
-            using (var connection = new MySqlConnection(_conn.ConnectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
@@ -46,15 +45,19 @@ namespace Frends.MySql.Tests
                 {
                     await command.ExecuteNonQueryAsync();
                 }
+
+                using (var command = new MySqlCommand("CREATE PROCEDURE GetAllFromHodorTest() BEGIN SELECT * FROM HodorTest; END", connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
             }
         }
-
 
         //[OneTimeTearDown]
         [Test, Order(3)]
         public async Task OneTimeTearDown()
         {
-            using (var connection = new MySqlConnection(_conn.ConnectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
@@ -66,20 +69,25 @@ namespace Frends.MySql.Tests
                 {
                     await command.ExecuteNonQueryAsync();
                 }
+                using (var command = new MySqlCommand("DROP PROCEDURE GetAllFromHodorTest;", connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
             }
         }
 
 
         //        [Test]
         [Test, Order(2)]
-        [Category("Json tests")]
         public async Task ShouldReturnJsonString()
         {
-            var q = new QueryProperties { Query = @"select name as ""name"", value as ""value"" from HodorTest" };
+            var q = new InputQuery {ConnectionString = connectionString, 
+                Query = @"CALL GetAllFromHodorTest()" };
 
-            var options = new Options { ThrowErrorOnFailure = true };
+            options.ThrowErrorOnFailure = true;
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            Output result = await QueryTask.Query(q, _conn, options, new CancellationToken());
+            QueryOutput result = await QueryTask.Query(q, options, new CancellationToken());
 
             Assert.IsTrue(string.Equals(result.Result.ToString(), @"[
   {
@@ -93,6 +101,29 @@ namespace Frends.MySql.Tests
 ]"));
         }
 
+        //        [Test]
+        [Test, Order(2)]
+        public async Task CallProcedure()
+        {
+            var q = new InputProcedure { ConnectionString = connectionString,
+                Execute = @"GetAllFromHodorTest()" };
+
+            options.ThrowErrorOnFailure = true;
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.None;
+
+            QueryOutput result = await QueryTask.ExecuteStoredProcedure(q, options, new CancellationToken());
+
+            Assert.IsTrue(string.Equals(result.Result.ToString(), @"[
+  {
+    ""name"": ""hodor"",
+    ""value"": 123
+  },
+  {
+    ""name"": ""jon"",
+    ""value"": 321
+  }
+]"));
+        }
 
     }
 }
