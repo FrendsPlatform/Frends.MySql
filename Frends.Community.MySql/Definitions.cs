@@ -8,14 +8,15 @@ namespace Frends.MySql
 
     public enum MySqlCommandType { Text = 1, StoredProcedure = 4 }
 
+
     public enum MySqlTransactionIsolationLevel { Default, ReadCommitted, None, Serializable, ReadUncommitted, RepeatableRead}
     public class InputQuery
     {
-
         /// <summary>
         /// Mysql connection string
         /// </summary>
         [PasswordPropertyText]
+        [DisplayFormat(DataFormatString = "Text")]
         [DefaultValue("server=server;user=user;database=db;password=pw;")]
         public string ConnectionString { get; set; }
 
@@ -99,9 +100,10 @@ namespace Frends.MySql
     /// </summary>
     public class QueryOutput
     {
+        public dynamic Result { get; set; }
         public bool Success { get; set; }
         public string Message { get; set; }
-        public dynamic Result { get; set; }
+
     }
 
 }
