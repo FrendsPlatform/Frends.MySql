@@ -1,10 +1,12 @@
 # Frends.Community.MySql
 
-FRENDS 4 Task for querying data from MySql database
+FRENDS Task for connecting to MySql database
 
 - [Installing](#installing)
 - [Task](#tasks)
-    - [Query](#query)
+    - [ExecuteQuery](#executequery)
+    - [ExecuteNonQuery](#ExecuteNonQuery)
+    - [ExecuteScalar](#ExecuteScalar)
 - [Building](#building)
 - [Contributing](#contributing)
 - [Change Log](#change-log)
@@ -12,18 +14,20 @@ FRENDS 4 Task for querying data from MySql database
 # Installing
 
 You can install the task via FRENDS UI Task view, by searching for packages. You can also download the latest NuGet package from https://www.myget.org/feed/frends/package/nuget/Frends.MySql and import it manually via the Task view.
+
 # Task
 
-## Query
+## ExecuteQuery
 
-Execute queries against the MySql database.
+Execute queries against the MySql database and return result of query in JToken.
 
 ### InputQuery Properties
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | Connection string | string | MySql database connection string | `server=<<your host>>;uid=<<your username>>;pwd=<<your password>>;database=<<your database name>>;` |
-| Query | string | The query to execute | `SELECT * FROM Table WHERE field = @paramName`|
-| Parameters | array[Query Parameter] | Possible query parameters. See [Query Parameter](#query-parameter) |  |
+| CommandType | enum<> | Indicates is the CommandText interpreted as text (usually query) or as a stored procedure). Possible values are `Text` and `StoredProcedure`. More info [here]( https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandType.htm). | `Text`|
+| CommandText | string | SQL statement to execute at the data source. Usually query or name of a stored procedure. More info [here]( https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandText.htm). | `SELECT * FROM Table WHERE field = @paramName` |
+| Parameters | array[Query Parameter] | Possible parameters. See bellow. |  |
 
 #### Parameter Properties
 
@@ -31,7 +35,7 @@ Execute queries against the MySql database.
 | ------------| -----------| --------------- | ------- |
 | Name | string | Parameter name used in Query property | `username` |
 | Value | string | Parameter value | `myUser` |
-| Data type | enum<> | Parameter data type | `VARCHAR` |
+| Data type | enum<> | Parameter [data type](https://dev.mysql.com/doc/dev/connector-net/8.0/html/T_MySql_Data_MySqlClient_MySqlDbType.htm). | `VARCHAR` |
 
 ### Options Properties
 
@@ -39,7 +43,7 @@ Execute queries against the MySql database.
 | ------------| -----------| --------------- | ------- |
 | Timeout seconds | int | Query timeout in seconds | `60` |
 | Throw error on failure | bool | Specify if Exception should be thrown when an error occurs. If set to *false*, task outcome can be checked from #result.Success property. | `false` 
-| MySqlTransactionIsolationLevel | enum<> | Possible Transaction isolation level values are: Default, ReadCommitted, None, Serializable, ReadUncommitted, RepeatableRead. None means that queries are not made inside a transaction. Other levels are explained in https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html | `None`
+| MySqlTransactionIsolationLevel | enum<> | Possible Transaction isolation level values are: `Default`, `ReadCommitted`, `None`, `Serializable`, `ReadUncommitted`, `RepeatableRead`. None means that queries are not made inside a transaction. Other levels are explained [here]( https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html) | `None`
 
 ### Output
 | Property    | Type       | Description     | Example |
@@ -60,31 +64,51 @@ Execute queries against the MySql database.
 ]` |
 
 To access query result, use 
+
 ```
 #result.Result
 ```
 
-## ExecuteStoredProcedure
+## ExecuteNonQuery
 
-Executes StoredProcedure against the MySql database.
+Executes non querry ( UPDATE, INSERT, and DELETE) the return value is the number of rows affected by the command. For all other types of statements, the return value is -1. 
 
 
-### InputProcedure Properties
+#### Parameter Properties
+Same as in ExecuteQuery: See [Query Parameter](#query-parameter) 
+
+### Output
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
-| Connection string | string | MySql database connection string | `server=<<your host>>;uid=<<your username>>;pwd=<<your password>>;database=<<your database name>>;` |
-| Execute | string | Name of the stored procedurte to be executed. | `SELECT * FROM Table WHERE field = @paramName`|
-| Parameters | array[Query Parameter] | Possible query parameters. See [Query Parameter](#query-parameter) |  |
+| Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
+| Message | string | Error message. Always null, if Throw error on failure is set to true. | `true` |
+| Result | Int | the return value is the number of rows affected by the command. For all other types of statements, the return value is -1.  | `5` |
 
-#### Parameter Properties for Execute Stored Procedure
-Same as in Query: See [Query Parameter](#query-parameter) 
+To access query result, use 
 
-### Options Properties for Execute Stored Procedure
-Same as in Query: See [Options Properties](#options-properties) 
+```
+#result.Result
+```
 
-### Output for Execute Stored Procedure
-Same as in Query: See [Output](#output) 
+## ExecuteScalar
 
+ Executes the query, and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored. 
+
+#### Parameter Properties
+Same as in ExecuteQuery: See [Query Parameter](#query-parameter) 
+
+### Output
+| Property    | Type       | Description     | Example |
+| ------------| -----------| --------------- | ------- |
+| Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
+| Message | string | Error message. Always null, if Throw error on failure is set to true. | `true` |
+| Result | dynamic <int, double, etc.> | The first column of the first row in the result set returned by the query. Extra columns or rows are ignored.  | `5` |
+
+To access query result, use 
+
+```
+#result.Result
+```
 
 # Building
 

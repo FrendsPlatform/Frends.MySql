@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 #pragma warning disable 1591
@@ -6,10 +7,22 @@ using System.ComponentModel.DataAnnotations;
 namespace Frends.MySql
 {
 
-    public enum MySqlCommandType { Text = 1, StoredProcedure = 4 }
+    /// <summary>
+    /// Gets or sets a value indicating how the CommandText property is to be interpreted. https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandType.htm
+    /// </summary>
+    public enum MySqlCommandType { Text = 1, StoredProcedure = 4}
 
+    /// <summary>
+    /// Use ExecuteQueryAsync, ExecuteNonQueryAsync, ExecuteScalarAsync function from https://dev.mysql.com/doc/dev/connector-net/6.10/html/Methods_T_MySql_Data_MySqlClient_MySqlCommand.htm to execute the query.
+    /// </summary>
+    public enum MySqlCommandMethod { ExecuteQuery, ExecuteNonQuery, ExecuteScalar }
 
+    /// <summary>
+    /// Transaction isolation level to use: https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
+    /// </summary>
     public enum MySqlTransactionIsolationLevel { Default, ReadCommitted, None, Serializable, ReadUncommitted, RepeatableRead}
+
+
     public class InputQuery
     {
         /// <summary>
@@ -21,11 +34,16 @@ namespace Frends.MySql
         public string ConnectionString { get; set; }
 
         /// <summary>
-        /// Querry 
+        /// Query type, Text or StoredProcedure
+        /// </summary>
+        public MySqlCommandType CommandType { get; set; }
+
+        /// <summary>
+        ///  SQL statement to execute at the data source. Usually query or name of a stored procedure. https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandText.htm
         /// </summary>
         [DisplayFormat(DataFormatString = "Sql")]
         [DefaultValue("SELECT ColumnName FROM TableName")]
-        public string Query { get; set; }
+        public string CommandText { get; set; }
 
         /// <summary>
         /// Parameters for the database query
@@ -33,28 +51,9 @@ namespace Frends.MySql
         public Parameter[] Parameters { get; set; }
     }
 
-    public class InputProcedure
-    {
-
-        /// <summary>
-        /// Mysql connection string
-        /// </summary>
-        [PasswordPropertyText]
-        [DefaultValue("server=server;user=user;database=db;password=pw;")]
-        public string ConnectionString { get; set; }
-        /// <summary>
-        /// Querry 
-        /// </summary>
-        [DisplayFormat(DataFormatString = "Sql")]
-        [DefaultValue("SELECT ColumnName FROM TableName")]
-        public string Execute { get; set; }
-
-        /// <summary>
-        /// Parameters for the database query
-        /// </summary>
-        public Parameter[] Parameters { get; set; }
-    }
-
+    /// <summary>
+    /// Set properties of parameters. More info https://dev.mysql.com/doc/dev/connector-net/8.0/html/T_MySql_Data_MySqlClient_MySqlParameterCollection.htm
+    /// </summary>
     public class Parameter
     {
         /// <summary>
@@ -70,9 +69,7 @@ namespace Frends.MySql
         [DefaultValue("Parameter value")]
         [DisplayFormat(DataFormatString = "Text")]
         public dynamic Value { get; set; }
-
     }
-
 
     public class Options
     {
@@ -83,16 +80,14 @@ namespace Frends.MySql
         [DefaultValue(30)]
         public int TimeoutSeconds { get; set; }
 
-
         /// <summary>
-        /// Choose if error should be thrown if Task failes.
+        /// Choose if error should be thrown if Task fails.
         /// Otherwise returns Object {Success = false }
         /// </summary>
         [DefaultValue(true)]
         public bool ThrowErrorOnFailure { get; set; }
 
         public MySqlTransactionIsolationLevel MySqlTransactionIsolationLevel;
-
     }
 
     /// <summary>

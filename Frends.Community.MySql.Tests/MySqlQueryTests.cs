@@ -22,8 +22,7 @@ namespace Frends.MySql.Tests
         };
 
         //[OneTimeSetUp]
-        [Test, Order(1)]
-        public async Task OneTimeSetUp()
+        [Test, Order(1)] public async Task OneTimeSetUp()
         {
             using (var connection = new MySqlConnection(connectionString))
             {
@@ -54,7 +53,7 @@ namespace Frends.MySql.Tests
         }
 
         //[OneTimeTearDown]
-        [Test, Order(3)]
+        [Test, Order(50)]
         public async Task OneTimeTearDown()
         {
             using (var connection = new MySqlConnection(connectionString))
@@ -79,17 +78,21 @@ namespace Frends.MySql.Tests
 
         //        [Test]
         [Test, Order(2)]
-        public async Task ShouldReturnJsonString()
+        public async Task TestExecuteQuery()
         {
             var q = new InputQuery {ConnectionString = connectionString, 
-                Query = @"CALL GetAllFromHodorTest()" };
+                CommandText = @"CALL GetAllFromHodorTest()",
+                CommandType = MySqlCommandType.Text
+
+            };
 
             options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.Query(q, options, new CancellationToken());
+            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-            Assert.IsTrue(string.Equals(result.Result.ToString(), @"[
+
+            Assert.That(result.Result.ToString(), Is.EqualTo(@"[
   {
     ""name"": ""hodor"",
     ""value"": 123
@@ -99,21 +102,68 @@ namespace Frends.MySql.Tests
     ""value"": 321
   }
 ]"));
+
         }
 
         //        [Test]
-        [Test, Order(2)]
-        public async Task CallProcedure()
+        [Test, Order(3)]
+        public async Task TestExecuteNonQuery()
         {
-            var q = new InputProcedure { ConnectionString = connectionString,
-                Execute = @"GetAllFromHodorTest()" };
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString,
+                CommandText = "insert into HodorTest (name, value) values ('amor', 123), ('ra', 321);",
+                CommandType = MySqlCommandType.Text
+
+            };
+
+            options.ThrowErrorOnFailure = true;
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+
+            QueryOutput result = await QueryTask.ExecuteNonQuery(q, options, new CancellationToken());
+
+
+            Assert.That(result.Result.ToString(), Is.EqualTo("2"));
+
+        }
+
+
+        //        [Test]
+        [Test, Order(3)]
+        public async Task TestExecuteScalar()
+        {
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString,
+                CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' ",
+                CommandType = MySqlCommandType.Text
+
+            };
+
+            options.ThrowErrorOnFailure = true;
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+
+            QueryOutput result = await QueryTask.ExecuteScalar(q, options, new CancellationToken());
+
+            Assert.That(result.Result.ToString(), Is.EqualTo("123"));
+
+
+        }
+        //        [Test]
+        [Test, Order(2)]
+        public async Task TestCallProcedureWithExecuteQuery()
+        {
+            var q = new InputQuery { ConnectionString = connectionString,
+                CommandText = @"GetAllFromHodorTest",
+                CommandType = MySqlCommandType.StoredProcedure
+            };
 
             options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.None;
 
-            QueryOutput result = await QueryTask.ExecuteStoredProcedure(q, options, new CancellationToken());
+            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-            Assert.IsTrue(string.Equals(result.Result.ToString(), @"[
+            Assert.That(result.Result.ToString(), Is.EqualTo(@"[
   {
     ""name"": ""hodor"",
     ""value"": 123

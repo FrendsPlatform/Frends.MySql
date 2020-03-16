@@ -9,8 +9,7 @@ using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Frends.MySql
-{
+namespace Frends.MySql{
         /// <summary>
         /// Example task package for handling files
         /// </summary>
@@ -23,21 +22,45 @@ namespace Frends.MySql
             /// <param name="options"></param>
             /// <param name="cancellationToken"></param>
             /// <returns>Object { bool Success, string Message, JToken Result }</returns>
-            public static async Task<QueryOutput> Query(
+            public static async Task<QueryOutput> ExecuteQuery(
                 [PropertyTab]InputQuery query,
                 [PropertyTab] Options options,
                 CancellationToken cancellationToken)
             {
-                return await GetMySqlCommandResult(query.Query, query.ConnectionString, query.Parameters, options, MySqlCommandType.Text, cancellationToken);
+                return await GetMySqlCommandResult(query.CommandText, query.ConnectionString, query.Parameters, options, query.CommandType, MySqlCommandMethod.ExecuteQuery, cancellationToken);
             }
 
-            public static async Task<QueryOutput> ExecuteStoredProcedure(
-                [PropertyTab]InputProcedure execute,
-                [PropertyTab] Options options,
-                CancellationToken cancellationToken)
-            {
-                return await GetMySqlCommandResult(execute.Execute, execute.ConnectionString, execute.Parameters, options, MySqlCommandType.StoredProcedure, cancellationToken);
-            }
+
+        /// <summary>
+        /// Task for performing queries in Oracle databases. See documentation at https://github.com/CommunityHiQ/Frends.Community.Oracle.Query
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Object { bool Success, string Message, JToken Result }</returns>
+        public static async Task<QueryOutput> ExecuteScalar(
+            [PropertyTab]InputQuery query,
+            [PropertyTab] Options options,
+            CancellationToken cancellationToken)
+        {
+            return await GetMySqlCommandResult(query.CommandText, query.ConnectionString, query.Parameters, options, query.CommandType, MySqlCommandMethod.ExecuteScalar, cancellationToken);
+        }
+
+        /// <summary>
+        /// Task for performing queries in Oracle databases. See documentation at https://github.com/CommunityHiQ/Frends.Community.Oracle.Query
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Object { bool Success, string Message, JToken Result }</returns>
+        public static async Task<QueryOutput> ExecuteNonQuery(
+            [PropertyTab]InputQuery query,
+            [PropertyTab] Options options,
+            CancellationToken cancellationToken)
+        {
+            return await GetMySqlCommandResult(query.CommandText, query.ConnectionString, query.Parameters, options, query.CommandType, MySqlCommandMethod.ExecuteNonQuery, cancellationToken);
+        }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security",
                 "CA2100:Review SQL queries for security vulnerabilities", Justification =
@@ -46,88 +69,82 @@ namespace Frends.MySql
                 string query, string connectionString, IEnumerable<Parameter> parameters,
                 Options options, 
                 MySqlCommandType commandType, 
+                MySqlCommandMethod commandMethod,
                 CancellationToken cancellationToken)
             {
                 try
                 {
                     using (var c = new MySqlConnection(connectionString))
                     {
-                        try
+                        await c.OpenAsync(cancellationToken);
+
+                        using (var command = new MySqlCommand(query, c))
                         {
-                            await c.OpenAsync(cancellationToken);
+                            command.CommandTimeout = options.TimeoutSeconds;
 
-                            using (var command = new MySqlCommand(query, c))
+                            // check for command parameters and set them
+                            if (parameters != null)
+                                command.Parameters.AddRange(parameters.Select(CreateMySqlParameter)
+                                    .ToArray());
+
+                            else if (commandType == MySqlCommandType.Text)
                             {
-                                command.CommandTimeout = options.TimeoutSeconds;
+                                command.CommandType = CommandType.Text;
 
-                                // check for command parameters and set them
-                                if (parameters != null)
-                                    command.Parameters.AddRange(parameters.Select(CreateMySqlParameter)
-                                        .ToArray());
-
-                                else if (commandType == MySqlCommandType.Text)
-                                {
-                                    command.CommandType = CommandType.Text;
-
-                                }
-                                else if (commandType == MySqlCommandType.Text)
-                                {
-                                    command.CommandType = CommandType.StoredProcedure;
-                                }
-
-                                if (options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.None)
-                                {
-                                    // declare Result object
-                                    var queryResult = await command.ToJTokenAsync(cancellationToken);
-                                    return new QueryOutput {Success = true, Result = queryResult};
-                                }
-
-                                else
-                                {
-                                    var transaction =
-                                        options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.Default
-                                            ? c.BeginTransaction()
-                                            : c.BeginTransaction(options.MySqlTransactionIsolationLevel
-                                                .GetMySqlTransactionIsolationLevel());
-
-                                    command.Transaction = transaction;
-
-                                    // declare Result object
-                                    try
-                                    {
-                                        var queryResult = await command.ToJTokenAsync(cancellationToken);
-                                        return new QueryOutput {Success = true, Result = queryResult};
-
-                                    }
-                                    catch (MySqlException ex)
-                                    {
-                                        try
-                                        {
-                                            transaction.Rollback();
-                                        }
-                                        catch
-                                        {
-                                            if (transaction.Connection != null)
-                                            {
-
-                                                throw new Exception("An exception of type " + ex.GetType() +
-                                                " was encountered while attempting to roll back the transaction. Some data might be modified in the database.");
-                                            }
-
-                                            throw;
-                                        }
-                                        throw;
-                                    }
-                                }
+                            }
+                            else if (commandType == MySqlCommandType.StoredProcedure)
+                            {
+                                command.CommandType = CommandType.StoredProcedure;
                             }
 
-                        }
-                        finally
-                        {
-                            // Close connection
-                            c.Dispose();
-                            c.Close();
-                            MySqlConnection.ClearPool(c);
+                            if (options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.None)
+                            {
+                                // declare Result object
+                                // var queryResult = await command.ToJTokenAsync(cancellationToken);
+
+                                var queryResult = await CallRightFunction(command, commandMethod, cancellationToken);
+                                    return new QueryOutput {Success = true, Result = queryResult};
+                            }
+
+                            else
+                            {
+                                var transaction =
+                                    options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.Default
+                                        ? c.BeginTransaction()
+                                        : c.BeginTransaction(options.MySqlTransactionIsolationLevel
+                                            .GetMySqlTransactionIsolationLevel());
+
+                                command.Transaction = transaction;
+
+                                // declare Result object
+                                try
+                                {
+                                    // var queryResult = await command.ToJTokenAsync(cancellationToken);
+                                    var queryResult = await CallRightFunction(command, commandMethod, cancellationToken);
+
+                                    return new QueryOutput {Success = true, Result = queryResult};
+
+                                }
+                                catch (MySqlException ex)
+                                {
+                                    try
+                                    {
+                                        transaction.Rollback();
+                                    }
+                                    catch
+                                    {
+                                        if (transaction.Connection != null)
+                                        {
+
+                                            throw new Exception("An exception of type " + ex.GetType() +
+                                            " was encountered while attempting to roll back the transaction. Some data might be modified in the database.");
+                                        }
+
+                                        throw;
+                                    }
+                                    throw;
+                                }
+                            }
                         }
                     }
                 }
@@ -143,7 +160,28 @@ namespace Frends.MySql
                 }
             }
 
-        private static async Task<JToken> ToJTokenAsync(this MySqlCommand command , CancellationToken cancellationToken)
+            private static async Task<JToken> CallRightFunction(this MySqlCommand command, MySqlCommandMethod commandMethod,
+                CancellationToken cancellationToken)
+            {
+                var queryResult = JToken.FromObject(new JObject());
+                switch (commandMethod)
+                {
+                    case MySqlCommandMethod.ExecuteQuery:
+                    //command.CommandType = CommandType.StoredProcedure;
+                    queryResult = await command.ToJTokenAsync(cancellationToken);
+                    break;
+                case MySqlCommandMethod.ExecuteNonQuery:
+                    queryResult = await command.ExecuteNonQueryAsync(cancellationToken);
+                    break;
+
+                case MySqlCommandMethod.ExecuteScalar:
+                    queryResult = JToken.FromObject(await command.ExecuteScalarAsync(cancellationToken));
+                    break;
+                }
+                return queryResult;
+            }
+
+            private static async Task<JToken> ToJTokenAsync(this MySqlCommand command , CancellationToken cancellationToken)
         {
             using (var reader = await command.ExecuteReaderAsync(cancellationToken) as MySqlDataReader)
             {
