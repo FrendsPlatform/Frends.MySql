@@ -168,7 +168,7 @@ namespace Frends.MySql{
                 {
                     case MySqlCommandMethod.ExecuteQuery:
                     //command.CommandType = CommandType.StoredProcedure;
-                    queryResult = await command.ToJTokenAsync(cancellationToken);
+                    queryResult = await command.ExecuteQueryWithReaderAsync(cancellationToken);
                     break;
                 case MySqlCommandMethod.ExecuteNonQuery:
                     queryResult = await command.ExecuteNonQueryAsync(cancellationToken);
@@ -181,7 +181,7 @@ namespace Frends.MySql{
                 return queryResult;
             }
 
-            private static async Task<JToken> ToJTokenAsync(this MySqlCommand command , CancellationToken cancellationToken)
+            private static async Task<JToken> ExecuteQueryWithReaderAsync(this MySqlCommand command , CancellationToken cancellationToken)
         {
             using (var reader = await command.ExecuteReaderAsync(cancellationToken) as MySqlDataReader)
             {

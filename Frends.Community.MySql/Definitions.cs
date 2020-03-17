@@ -87,8 +87,11 @@ namespace Frends.MySql
         [DefaultValue(true)]
         public bool ThrowErrorOnFailure { get; set; }
 
-        public MySqlTransactionIsolationLevel MySqlTransactionIsolationLevel;
-    }
+        /// <summary>
+        /// Transaction isolation level to use.
+        /// </summary>
+        public MySqlTransactionIsolationLevel MySqlTransactionIsolationLevel { get; set; }
+}
 
     /// <summary>
     /// Result to be returned from task

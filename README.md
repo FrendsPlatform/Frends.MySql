@@ -4,9 +4,9 @@ FRENDS Task for connecting to MySql database
 
 - [Installing](#installing)
 - [Task](#tasks)
-    - [ExecuteQuery](#executequery)
-    - [ExecuteNonQuery](#ExecuteNonQuery)
-    - [ExecuteScalar](#ExecuteScalar)
+  - [ExecuteQuery](#executequery)
+  - [ExecuteNonQuery](#ExecuteNonQuery)
+  - [ExecuteScalar](#ExecuteScalar)
 - [Building](#building)
 - [Contributing](#contributing)
 - [Change Log](#change-log)
@@ -50,20 +50,9 @@ Execute queries against the MySql database and return result of query in JToken.
 | ------------| -----------| --------------- | ------- |
 | Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
 | Message | string | Error message. Always null, if Throw error on failure is set to true. | `true` |
-| Result | JToken | Query result in JToken | `[ 
- {
-  "Name": "Teela",
-  "Age": 42,
-  "Address": "Test road 123"
- },
- {
-  "Name": "Adam",
-  "Age": 42,
-  "Address": null
- }
-]` |
+| Result | JToken | Query result in JToken | `[{ "Name": "Teela", "Age": 42, "Address": "Test road 123" }, { "Name": "Adam", "Age": 42, "Address": null }]` |
 
-To access query result, use 
+To access query result, use
 
 ```
 #result.Result
@@ -71,13 +60,14 @@ To access query result, use
 
 ## ExecuteNonQuery
 
-Executes non querry ( UPDATE, INSERT, and DELETE) the return value is the number of rows affected by the command. For all other types of statements, the return value is -1. 
+Executes non querry ( UPDATE, INSERT, and DELETE) the return value is the number of rows affected by the command. For all other types of statements, the return value is -1.
 
+### Parameter Properties
 
-#### Parameter Properties
-Same as in ExecuteQuery: See [Query Parameter](#query-parameter) 
+Same as in ExecuteQuery: See [Query Parameter](#query-parameter)
 
 ### Output
+
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
@@ -94,17 +84,19 @@ To access query result, use
 
  Executes the query, and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored. 
 
-#### Parameter Properties
+### Parameter Properties
+
 Same as in ExecuteQuery: See [Query Parameter](#query-parameter) 
 
 ### Output
+
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
 | Message | string | Error message. Always null, if Throw error on failure is set to true. | `true` |
 | Result | dynamic <int, double, etc.> | The first column of the first row in the result set returned by the query. Extra columns or rows are ignored.  | `5` |
 
-To access query result, use 
+To access query result, use
 
 ```
 #result.Result
@@ -129,6 +121,7 @@ Create a NuGet package
 `dotnet pack --configuration Release`
 
 # Contributing
+
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
 
 1. Fork the repo on GitHub
