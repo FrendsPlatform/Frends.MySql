@@ -120,7 +120,7 @@ namespace Frends.MySql.Tests
             options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.ExecuteNonQuery(q, options, new CancellationToken());
+            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
 
             Assert.That(result.Result.ToString(), Is.EqualTo("2"));
@@ -143,7 +143,7 @@ namespace Frends.MySql.Tests
             options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.ExecuteScalar(q, options, new CancellationToken());
+            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
             Assert.That(result.Result.ToString(), Is.EqualTo("123"));
 
@@ -155,13 +155,12 @@ namespace Frends.MySql.Tests
         {
             var q = new InputQuery { ConnectionString = connectionString,
                 CommandText = @"GetAllFromHodorTest",
-                CommandType = MySqlCommandType.StoredProcedure
             };
 
             options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.None;
 
-            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+            QueryOutput result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
 
             Assert.That(result.Result.ToString(), Is.EqualTo(@"[
   {

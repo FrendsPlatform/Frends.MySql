@@ -6,16 +6,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Frends.MySql
 {
-
     /// <summary>
     /// Gets or sets a value indicating how the CommandText property is to be interpreted. https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandType.htm
     /// </summary>
     public enum MySqlCommandType { Text = 1, StoredProcedure = 4}
-
-    /// <summary>
-    /// Use ExecuteQueryAsync, ExecuteNonQueryAsync, ExecuteScalarAsync function from https://dev.mysql.com/doc/dev/connector-net/6.10/html/Methods_T_MySql_Data_MySqlClient_MySqlCommand.htm to execute the query.
-    /// </summary>
-    public enum MySqlCommandMethod { ExecuteQuery, ExecuteNonQuery, ExecuteScalar }
 
     /// <summary>
     /// Transaction isolation level to use: https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
