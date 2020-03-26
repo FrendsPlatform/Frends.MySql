@@ -9,7 +9,11 @@ namespace Frends.MySql
     /// <summary>
     /// Gets or sets a value indicating how the CommandText property is to be interpreted. https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandType.htm
     /// </summary>
-    public enum MySqlCommandType { Text = 1, StoredProcedure = 4}
+    public enum MySqlCommandType 
+    { 
+        Text,
+        StoredProcedure
+    }
 
     /// <summary>
     /// Transaction isolation level to use: https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html

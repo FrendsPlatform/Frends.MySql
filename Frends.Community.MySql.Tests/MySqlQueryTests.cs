@@ -1,6 +1,9 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.IO;
+using NUnit.Framework;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Extensions;
 using MySql.Data.MySqlClient;
 
 namespace Frends.MySql.Tests
@@ -14,7 +17,7 @@ namespace Frends.MySql.Tests
     {
         // Problems with local MySql, tests not implemented yet
 
-        private string connectionString = "server=localhost;uid=root;pwd=pw;database=test;";
+        private string connectionString = "server=localhost;uid=root;pwd=kissa001;database=test;";
 
         Options options = new Options
         {
@@ -27,8 +30,9 @@ namespace Frends.MySql.Tests
             using (var connection = new MySqlConnection(connectionString))
             {
                 await connection.OpenAsync();
-
-                using (var command = new MySqlCommand("create table DecimalTest(DecimalValue decimal(38,30))", connection))
+                try
+                {
+                    using (var command = new MySqlCommand("create table DecimalTest(DecimalValue decimal(38,30))", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
@@ -48,6 +52,12 @@ namespace Frends.MySql.Tests
                 using (var command = new MySqlCommand("CREATE PROCEDURE GetAllFromHodorTest() BEGIN SELECT * FROM HodorTest; END", connection))
                 {
                     await command.ExecuteNonQueryAsync();
+                }
+                }
+                catch (Exception)
+                {
+                   // table probably/procedure exist already
+                    throw;
                 }
             }
         }
@@ -78,12 +88,11 @@ namespace Frends.MySql.Tests
 
         //        [Test]
         [Test, Order(2)]
-        public async Task TestExecuteQuery()
+        public async Task ShouldSuccess_DoBasicQuery()
         {
             var q = new InputQuery {ConnectionString = connectionString, 
-                CommandText = @"CALL GetAllFromHodorTest()",
+                CommandText = @"select  * from hodortest limit 2",
                 CommandType = MySqlCommandType.Text
-
             };
 
             options.ThrowErrorOnFailure = true;
@@ -91,7 +100,35 @@ namespace Frends.MySql.Tests
 
             QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
+            Assert.That(result.Success,Is.True);
+            Assert.That(result.Result.ToString(), Is.EqualTo(@"[
+  {
+    ""name"": ""hodor"",
+    ""value"": 123
+  },
+  {
+    ""name"": ""jon"",
+    ""value"": 321
+  }
+]"));
 
+        }
+        [Test, Order(2)]
+        public async Task ShouldSuccess_CallStoredProcedure()
+        {
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString,
+                CommandText = @"GetAllFromHodorTest",
+                CommandType = MySqlCommandType.StoredProcedure
+            };
+
+            options.ThrowErrorOnFailure = true;
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+
+            QueryOutput result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
+
+            Assert.That(result.Success, Is.True);
             Assert.That(result.Result.ToString(), Is.EqualTo(@"[
   {
     ""name"": ""hodor"",
@@ -105,14 +142,20 @@ namespace Frends.MySql.Tests
 
         }
 
+
+
         //        [Test]
         [Test, Order(3)]
-        public async Task TestExecuteNonQuery()
+        public async Task ShouldSuccess_InsertValues()
         {
+
+            string rndName = Path.GetRandomFileName();
+            Random rnd = new Random();
+            int rndValue = rnd.Next(1000);
             var q = new InputQuery
             {
                 ConnectionString = connectionString,
-                CommandText = "insert into HodorTest (name, value) values ('amor', 123), ('ra', 321);",
+                CommandText = "insert into HodorTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );",
                 CommandType = MySqlCommandType.Text
 
             };
@@ -122,11 +165,15 @@ namespace Frends.MySql.Tests
 
             QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-
-            Assert.That(result.Result.ToString(), Is.EqualTo("2"));
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Result.Contains(rndName).Count, Is.EqualTo(1));
+            Assert.That(result.Result.Contains(rndValue).Count, Is.EqualTo(1));
 
         }
-
+        public static string AddDoubleQuotes(string value)
+        {
+            return "\"" + value + "\"";
+        }
 
         //        [Test]
         [Test, Order(3)]

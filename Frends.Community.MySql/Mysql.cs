@@ -11,8 +11,10 @@ using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Dynamic;
+using System.Runtime.CompilerServices;
 
-namespace Frends.MySql{
+namespace Frends.MySql
+{
     /// <summary>
     /// Example task package for handling files
     /// </summary>
@@ -51,7 +53,7 @@ namespace Frends.MySql{
             return await GetMySqlCommandResult(query.CommandText, query.ConnectionString, query.Parameters, options,
                 MySqlCommandType.StoredProcedure, cancellationToken);
         }
-        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security",
             "CA2100:Review SQL queries for security vulnerabilities", Justification =
                 "One is able to write quereis in FRENDS. It is up to a FRENDS process prevent injections.")]
@@ -61,105 +63,122 @@ namespace Frends.MySql{
             MySqlCommandType commandType,
             CancellationToken cancellationToken)
         {
+
+           
+
             try
             {
-                using (var c = new MySqlConnection(connectionString))
+                using (var conn = new MySqlConnection(connectionString))
                 {
-                    await c.OpenAsync(cancellationToken);
+                    await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                    using (var command = new MySqlCommand(query, c))
+                    IDictionary<string, object> parameterObject = new ExpandoObject();
+                    if (parameters != null)
+                    {
+                        foreach (var parameter in parameters)
+                        {
+                            parameterObject.Add(parameter.Name, parameter.Value);
+                        }
+
+                    }
+
+                    using (var command = new MySqlCommand(query, conn))
                     {
                         command.CommandTimeout = options.TimeoutSeconds;
 
-                        IDictionary<string, object> parameterObject = new ExpandoObject();
-
-                        if (parameters != null)
+                        switch (commandType)
                         {
-                            foreach (var parameter in parameters)
-                            {
-                                parameterObject.Add(parameter.Name, parameter.Value);
-                            }
-
+                            case MySqlCommandType.Text:
+                                command.CommandType = CommandType.Text;
+                                break;
+                            case MySqlCommandType.StoredProcedure:
+                                command.CommandType = CommandType.StoredProcedure;
+                                break;
                         }
 
-                        else if (commandType == MySqlCommandType.Text)
+                        IsolationLevel isolationLevel;
+                        switch (options.MySqlTransactionIsolationLevel)
                         {
-                            command.CommandType = CommandType.Text;
-
+                            case MySqlTransactionIsolationLevel.ReadCommitted:
+                                isolationLevel = IsolationLevel.ReadCommitted; 
+                                break;
+                            case MySqlTransactionIsolationLevel.ReadUncommitted:
+                                isolationLevel = IsolationLevel.ReadUncommitted;
+                                break;
+                            case MySqlTransactionIsolationLevel.RepeatableRead:
+                                isolationLevel = IsolationLevel.RepeatableRead;
+                                break;
+                            case MySqlTransactionIsolationLevel.Serializable :
+                                isolationLevel = IsolationLevel.Serializable;
+                                break;
+                            default:
+                                isolationLevel = IsolationLevel.Unspecified; // MySqlTransactionIsolationLevel.none, default 
+                                break;
                         }
-                        else if (commandType == MySqlCommandType.StoredProcedure)
+
+                        switch (isolationLevel)
                         {
-                            command.CommandType = CommandType.StoredProcedure;
-                        }
+                            case IsolationLevel.Unspecified:
 
-                        if (options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.None)
-                        {
-                            using (var result = await command.Connection.ExecuteReaderAsync(
-                                    command.CommandText,
-                                    parameterObject,
-                                    commandType: command.CommandType,
-                                    commandTimeout: command.CommandTimeout)
-                                .ConfigureAwait(false))
-
-                            {
-                                var table = new DataTable();
-                                table.Load(result);
-                                var queryResult = JToken.FromObject(table);
-                                return new QueryOutput {Success = true, Result = queryResult};
-                            }
-                        }
-                        else
-                        {
-                            var transaction =
-                                options.MySqlTransactionIsolationLevel == MySqlTransactionIsolationLevel.Default
-                                    ? c.BeginTransaction()
-                                    : c.BeginTransaction(options.MySqlTransactionIsolationLevel
-                                        .GetMySqlTransactionIsolationLevel());
-
-                            command.Transaction = transaction;
-
-                            // declare Result object
-                            try
-                            {
-                                using (var result = await command.Connection.ExecuteReaderAsync(
-                                        command.CommandText,
-                                        parameterObject,
-                                        commandType: command.CommandType,
-                                        commandTimeout: command.CommandTimeout)
-                                    .ConfigureAwait(false))
-
+                                using (var trans = conn.BeginTransaction())
                                 {
-                                    var table = new DataTable();
-                                    table.Load(result);
-                                    var queryResult = JToken.FromObject(table);
-                                    transaction.Commit();
-
-                                    return new QueryOutput {Success = true, Result = queryResult};
-                                }
-
-                            }
-                            catch (MySqlException ex)
-                            {
-                                try
-                                {
-                                    transaction.Rollback();
-                                }
-                                catch
-                                {
-                                    if (transaction.Connection != null)
+                                    try
                                     {
+                                        var result = await conn.QueryAsync<int>(query, parameterObject, trans,command.CommandTimeout,command.CommandType)
+                                            .ConfigureAwait(false);
 
-                                        throw new Exception("An exception of type " + ex.GetType() +
-                                                            " was encountered while attempting to roll back the transaction. Some data might be modified in the database.");
+                                        trans.Commit();
+
+                                        var queryResult = JToken.FromObject(result);
+
+                                        return new QueryOutput { Success = true, Result = queryResult };
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        trans.Rollback();
+                                        trans.Dispose();
+                                        if (options.ThrowErrorOnFailure)
+                                            throw;
+                                        return new QueryOutput
+                                        {
+                                            Success = false,
+                                            Message = ex.Message
+                                        };
                                     }
 
-                                    throw;
                                 }
+                            default:
+                               
+                                using (var trans = conn.BeginTransaction(isolationLevel))
+                                {
+                                    try
+                                    {
+                                        var result = await conn.QueryAsync<int>(query, parameterObject, trans, command.CommandTimeout, command.CommandType)
+                                            .ConfigureAwait(false);
 
-                                throw;
-                            }
+                                        trans.Commit();
 
+                                        var queryResult = JToken.FromObject(result);
+
+                                        return new QueryOutput { Success = true, Result = queryResult};
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        trans.Rollback();
+                                        trans.Dispose();
+                                        if (options.ThrowErrorOnFailure)
+                                            throw;
+                                        return new QueryOutput
+                                        {
+                                            Success = false,
+                                            Message = ex.Message
+                                        };
+                                    }
+
+                                }
                         }
+
                     }
                 }
             }
@@ -173,6 +192,11 @@ namespace Frends.MySql{
                     Message = ex.Message
                 };
             }
+
+
         }
+
+
+
     }
 }
