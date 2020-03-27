@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Extensions;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
 
 namespace Frends.MySql.Tests
 {
@@ -113,6 +114,49 @@ namespace Frends.MySql.Tests
 ]"));
 
         }
+
+        [Test, Order(2)]
+        public async Task ShouldFail_DoBasicQuery()
+        {
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString,
+                CommandText = @"select  * from tablex limit 2",
+                CommandType = MySqlCommandType.Text
+            };
+
+            options.ThrowErrorOnFailure = false;
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+
+            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message.Contains("doesn't exist"));
+
+        }
+
+        [Test, Order(2)]
+        public async Task ShouldThrowMySqlException_DoBasicQuery()
+        {
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString,
+                CommandText = @"select  * from tablex limit 2",
+                CommandType = MySqlCommandType.Text
+            };
+
+            options.ThrowErrorOnFailure = true;
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+            
+            MySqlException ex = Assert.ThrowsAsync<MySqlException>(() =>  QueryTask.ExecuteQuery(q, options, new CancellationToken()));
+            Assert.That(ex.Message.Contains("doesn't exist"));
+           
+        }
+
+
+
+
+
         [Test, Order(2)]
         public async Task ShouldSuccess_CallStoredProcedure()
         {
@@ -129,22 +173,12 @@ namespace Frends.MySql.Tests
             QueryOutput result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
 
             Assert.That(result.Success, Is.True);
-            Assert.That(result.Result.ToString(), Is.EqualTo(@"[
-  {
-    ""name"": ""hodor"",
-    ""value"": 123
-  },
-  {
-    ""name"": ""jon"",
-    ""value"": 321
-  }
-]"));
+            Assert.That(result.Message.Equals("0 row(s) affected"));
 
         }
 
 
 
-        //        [Test]
         [Test, Order(3)]
         public async Task ShouldSuccess_InsertValues()
         {
@@ -166,8 +200,7 @@ namespace Frends.MySql.Tests
             QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
             Assert.That(result.Success, Is.True);
-            Assert.That(result.Result.Contains(rndName).Count, Is.EqualTo(1));
-            Assert.That(result.Result.Contains(rndValue).Count, Is.EqualTo(1));
+            Assert.That(result.Message.Equals("1 row(s) affected"));
 
         }
         public static string AddDoubleQuotes(string value)
@@ -177,8 +210,10 @@ namespace Frends.MySql.Tests
 
         //        [Test]
         [Test, Order(3)]
-        public async Task TestExecuteScalar()
+        public async Task ShouldSuccess_DoBasicQueryOneValue()
         {
+
+            
             var q = new InputQuery
             {
                 ConnectionString = connectionString,
@@ -191,35 +226,16 @@ namespace Frends.MySql.Tests
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
             QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
-
-            Assert.That(result.Result.ToString(), Is.EqualTo("123"));
-
-
-        }
-        //        [Test]
-        [Test, Order(2)]
-        public async Task TestCallProcedureWithExecuteQuery()
-        {
-            var q = new InputQuery { ConnectionString = connectionString,
-                CommandText = @"GetAllFromHodorTest",
-            };
-
-            options.ThrowErrorOnFailure = true;
-            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.None;
-
-            QueryOutput result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
-
+           
             Assert.That(result.Result.ToString(), Is.EqualTo(@"[
   {
-    ""name"": ""hodor"",
     ""value"": 123
-  },
-  {
-    ""name"": ""jon"",
-    ""value"": 321
   }
 ]"));
+          
         }
+
+
 
     }
 }
