@@ -33,7 +33,7 @@ namespace Frends.MySql.Tests
                 await connection.OpenAsync();
                 try
                 {
-                    using (var command = new MySqlCommand("create table DecimalTest(DecimalValue decimal(38,30))", connection))
+                    using (var command = new MySqlCommand("CREATE TABLE IF NOT EXISTS DecimalTest(DecimalValue decimal(38,30))", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
@@ -41,7 +41,7 @@ namespace Frends.MySql.Tests
                 {
                     await command.ExecuteNonQueryAsync();
                 }
-                using (var command = new MySqlCommand("create table HodorTest(name varchar(15), value int(10))", connection))
+                using (var command = new MySqlCommand("CREATE TABLE IF NOT EXISTS HodorTest(name varchar(15), value int(10))", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
@@ -50,7 +50,7 @@ namespace Frends.MySql.Tests
                     await command.ExecuteNonQueryAsync();
                 }
 
-                using (var command = new MySqlCommand("CREATE PROCEDURE GetAllFromHodorTest() BEGIN SELECT * FROM HodorTest; END", connection))
+                using (var command = new MySqlCommand("DROP PROCEDURE IF EXISTS GetAllFromHodorTest; CREATE PROCEDURE GetAllFromHodorTest() BEGIN SELECT * FROM HodorTest; END", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
@@ -87,7 +87,7 @@ namespace Frends.MySql.Tests
         }
 
 
-        //        [Test]
+      
         [Test, Order(2)]
         public async Task ShouldSuccess_DoBasicQuery()
         {
@@ -136,7 +136,7 @@ namespace Frends.MySql.Tests
         }
 
         [Test, Order(2)]
-        public async Task ShouldThrowMySqlException_DoBasicQuery()
+        public void ShouldThrowMySqlException_DoBasicQuery()
         {
             var q = new InputQuery
             {
@@ -147,10 +147,10 @@ namespace Frends.MySql.Tests
 
             options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
-            
-            MySqlException ex = Assert.ThrowsAsync<MySqlException>(() =>  QueryTask.ExecuteQuery(q, options, new CancellationToken()));
+
+            MySqlException ex = Assert.ThrowsAsync<MySqlException>(() => QueryTask.ExecuteQuery(q, options, new CancellationToken()));
             Assert.That(ex.Message.Contains("doesn't exist"));
-           
+
         }
 
 

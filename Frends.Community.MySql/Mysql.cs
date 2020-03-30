@@ -120,7 +120,7 @@ namespace Frends.MySql
                         switch (isolationLevel)
                         {
                             case IsolationLevel.Unspecified:
-                                if (scalarReturnQueries.Any(query.Contains) || command.CommandType == CommandType.StoredProcedure)
+                                if (scalarReturnQueries.Any(query.TrimStart().ToLower().Contains) || command.CommandType == CommandType.StoredProcedure)
                                 {
                                     using (var trans = conn.BeginTransaction())
                                     {
@@ -183,7 +183,7 @@ namespace Frends.MySql
 
                             default:
 
-                                if (scalarReturnQueries.Any(query.Contains) || command.CommandType == CommandType.StoredProcedure)
+                                if (scalarReturnQueries.Any(query.TrimStart().ToLower().Contains) || command.CommandType == CommandType.StoredProcedure)
                                 {
                                     using (var trans = conn.BeginTransaction(isolationLevel))
                                     {
