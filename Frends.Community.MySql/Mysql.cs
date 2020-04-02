@@ -29,13 +29,14 @@ namespace Frends.MySql
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Object { bool Success, string Message, JToken Result }</returns>
-        public static async Task<QueryOutput> ExecuteQuery(
+        public static async Task<QueryResult> ExecuteQuery(
             [PropertyTab] InputQuery query,
             [PropertyTab] Options options,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await GetMySqlCommandResult(query.CommandText, query.ConnectionString, query.Parameters, options,
-                MySqlCommandType.Text, cancellationToken);
+                CommandType.Text, cancellationToken);
         }
 
         /// <summary>
@@ -45,26 +46,27 @@ namespace Frends.MySql
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Object { bool Success, string Message, JToken Result }</returns>
-        public static async Task<QueryOutput> ExecuteProcedure(
+        public static async Task<QueryResult> ExecuteProcedure(
             [PropertyTab] InputQuery query,
             [PropertyTab] Options options,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await GetMySqlCommandResult(query.CommandText, query.ConnectionString, query.Parameters, options,
-                MySqlCommandType.StoredProcedure, cancellationToken);
+                CommandType.StoredProcedure, cancellationToken);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security",
             "CA2100:Review SQL queries for security vulnerabilities", Justification =
                 "One is able to write quereis in FRENDS. It is up to a FRENDS process prevent injections.")]
-        private static async Task<QueryOutput> GetMySqlCommandResult(
+        private static async Task<QueryResult> GetMySqlCommandResult(
             string query, string connectionString, IEnumerable<Parameter> parameters,
             Options options,
-            MySqlCommandType commandType,
+            CommandType commandType,
             CancellationToken cancellationToken)
         {
 
-            var scalarReturnQueries = new[] { "update ", "insert ", "drop ", "truncate " };
+            var scalarReturnQueries = new[] { "update ", "insert ", "drop ", "truncate ", "create ", "alter " };
 
             try
             {
@@ -86,16 +88,7 @@ namespace Frends.MySql
                     using (var command = new MySqlCommand(query, conn))
                     {
                         command.CommandTimeout = options.TimeoutSeconds;
-
-                        switch (commandType)
-                        {
-                            case MySqlCommandType.Text:
-                                command.CommandType = CommandType.Text;
-                                break;
-                            case MySqlCommandType.StoredProcedure:
-                                command.CommandType = CommandType.StoredProcedure;
-                                break;
-                        }
+                        command.CommandType = commandType;
 
                         IsolationLevel isolationLevel;
                         switch (options.MySqlTransactionIsolationLevel)
@@ -113,137 +106,58 @@ namespace Frends.MySql
                                 isolationLevel = IsolationLevel.Serializable;
                                 break;
                             default:
-                                isolationLevel = IsolationLevel.Unspecified; // MySqlTransactionIsolationLevel.none, default
+                                isolationLevel = IsolationLevel.RepeatableRead;
                                 break;
                         }
 
-                        switch (isolationLevel)
+
+                        if (scalarReturnQueries.Any(query.TrimStart().ToLower().Contains) || command.CommandType == CommandType.StoredProcedure)
                         {
-                            case IsolationLevel.Unspecified:
-                                if (scalarReturnQueries.Any(query.TrimStart().ToLower().Contains) || command.CommandType == CommandType.StoredProcedure)
+                            // scalar return
+                            using (var trans = conn.BeginTransaction(isolationLevel))
+                            {
+                                try
                                 {
-                                    using (var trans = conn.BeginTransaction())
-                                    {
-                                        try
-                                        {
-                                            var affectedRows = conn.Execute(query, parameterObject, trans,
-                                                command.CommandTimeout, command.CommandType);
-                                                
+                                    var affectedRows = await conn.ExecuteAsync(query, parameterObject, trans,
+                                        command.CommandTimeout, command.CommandType);
 
-                                            trans.Commit();
+                                    trans.Commit();
 
-                                            return new QueryOutput { Success = true, Message = affectedRows.ToString() + " row(s) affected" };
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            trans.Rollback();
-                                            trans.Dispose();
-                                            if (options.ThrowErrorOnFailure)
-                                                throw;
-                                            return new QueryOutput
-                                            {
-                                                Success = false,
-                                                Message = ex.Message
-                                            };
-                                        }
+                                    return new QueryResult { Result = JToken.FromObject(affectedRows) };
 
-                                    }
                                 }
-                                else
+                                catch (Exception ex)
                                 {
-                                    using (var trans = conn.BeginTransaction())
-                                    {
-                                        try
-                                        {
-                                            var result = await conn.QueryAsync(query, parameterObject, trans, command.CommandTimeout, command.CommandType)
-                                                .ConfigureAwait(false);
+                                    trans.Rollback();
+                                    trans.Dispose();
+                                    throw new Exception($"Query failed " + ex.Message);
 
-                                            trans.Commit();
-
-                                            var queryResult = JToken.FromObject(result);
-
-                                            return new QueryOutput { Success = true, Result = queryResult };
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            trans.Rollback();
-                                            trans.Dispose();
-                                            if (options.ThrowErrorOnFailure)
-                                                throw;
-                                            return new QueryOutput
-                                            {
-                                                Success = false,
-                                                Message = ex.Message
-                                            };
-                                        }
-
-                                    }
                                 }
 
-
-                            default:
-
-                                if (scalarReturnQueries.Any(query.TrimStart().ToLower().Contains) || command.CommandType == CommandType.StoredProcedure)
+                            }
+                        }
+                        else
+                        {
+                            using (var trans = conn.BeginTransaction(isolationLevel))
+                            {
+                                try
                                 {
-                                    using (var trans = conn.BeginTransaction(isolationLevel))
-                                    {
-                                        try
-                                        {
-                                            var affectedRows = conn.Execute(query, parameterObject, trans,
-                                                command.CommandTimeout, command.CommandType);
-                                         
+                                    var result = await conn.QueryAsync(query, parameterObject, trans, command.CommandTimeout, command.CommandType)
+                                        .ConfigureAwait(false);
 
-                                            trans.Commit();
+                                    trans.Commit();
 
-                                            return new QueryOutput { Success = true, Message = affectedRows.ToString() + " row(s) affected" };
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            trans.Rollback();
-                                            trans.Dispose();
-                                            if (options.ThrowErrorOnFailure)
-                                                throw;
-                                            return new QueryOutput
-                                            {
-                                                Success = false,
-                                                Message = ex.Message
-                                            };
-                                        }
-
-                                    }
+                                    return new QueryResult { Result = JToken.FromObject(result) };
                                 }
-                                else
+                                catch (Exception ex)
                                 {
-                                    using (var trans = conn.BeginTransaction(isolationLevel))
-                                    {
-                                        try
-                                        {
-                                            var result = await conn.QueryAsync(query, parameterObject, trans, command.CommandTimeout, command.CommandType)
-                                                .ConfigureAwait(false);
+                                    trans.Rollback();
+                                    trans.Dispose();
+                                    throw new Exception($"Query failed " + ex.Message);
 
-                                            trans.Commit();
-
-                                            var queryResult = JToken.FromObject(result);
-
-                                            return new QueryOutput { Success = true, Result = queryResult };
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            trans.Rollback();
-                                            trans.Dispose();
-                                            if (options.ThrowErrorOnFailure)
-                                                throw;
-                                            return new QueryOutput
-                                            {
-                                                Success = false,
-                                                Message = ex.Message
-                                            };
-                                        }
-
-                                    }
                                 }
 
-
+                            }
                         }
 
                     }
@@ -251,13 +165,7 @@ namespace Frends.MySql
             }
             catch (Exception ex)
             {
-                if (options.ThrowErrorOnFailure)
-                    throw;
-                return new QueryOutput
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
+                throw new Exception(ex.Message);
             }
 
 

@@ -26,7 +26,8 @@ namespace Frends.MySql.Tests
         };
 
         //[OneTimeSetUp]
-        [Test, Order(1)] public async Task OneTimeSetUp()
+        [Test, Order(1)]
+        public async Task OneTimeSetUp()
         {
             using (var connection = new MySqlConnection(connectionString))
             {
@@ -34,30 +35,30 @@ namespace Frends.MySql.Tests
                 try
                 {
                     using (var command = new MySqlCommand("CREATE TABLE IF NOT EXISTS DecimalTest(DecimalValue decimal(38,30))", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-                using (var command = new MySqlCommand("insert into DecimalTest (DecimalValue) values (1.123456789123456789123456789123)", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-                using (var command = new MySqlCommand("CREATE TABLE IF NOT EXISTS HodorTest(name varchar(15), value int(10))", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-                using (var command = new MySqlCommand("insert into HodorTest (name, value) values ('hodor', 123), ('jon', 321);", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
+                    {
+                        await command.ExecuteNonQueryAsync();
+                    }
+                    using (var command = new MySqlCommand("insert into DecimalTest (DecimalValue) values (1.123456789123456789123456789123)", connection))
+                    {
+                        await command.ExecuteNonQueryAsync();
+                    }
+                    using (var command = new MySqlCommand("CREATE TABLE IF NOT EXISTS HodorTest(name varchar(15), value int(10))", connection))
+                    {
+                        await command.ExecuteNonQueryAsync();
+                    }
+                    using (var command = new MySqlCommand("insert into HodorTest (name, value) values ('hodor', 123), ('jon', 321);", connection))
+                    {
+                        await command.ExecuteNonQueryAsync();
+                    }
 
-                using (var command = new MySqlCommand("DROP PROCEDURE IF EXISTS GetAllFromHodorTest; CREATE PROCEDURE GetAllFromHodorTest() BEGIN SELECT * FROM HodorTest; END", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
+                    using (var command = new MySqlCommand("DROP PROCEDURE IF EXISTS GetAllFromHodorTest; CREATE PROCEDURE GetAllFromHodorTest() BEGIN SELECT * FROM HodorTest; END", connection))
+                    {
+                        await command.ExecuteNonQueryAsync();
+                    }
                 }
                 catch (Exception)
                 {
-                   // table probably/procedure exist already
+                    // table probably/procedure exist already
                     throw;
                 }
             }
@@ -87,21 +88,21 @@ namespace Frends.MySql.Tests
         }
 
 
-      
+
         [Test, Order(2)]
         public async Task ShouldSuccess_DoBasicQuery()
         {
-            var q = new InputQuery {ConnectionString = connectionString, 
-                CommandText = @"select  * from hodortest limit 2",
-                CommandType = MySqlCommandType.Text
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString,
+                CommandText = @"select  * from hodortest limit 2"
+
             };
 
-            options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+            QueryResult result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-            Assert.That(result.Success,Is.True);
             Assert.That(result.Result.ToString(), Is.EqualTo(@"[
   {
     ""name"": ""hodor"",
@@ -115,71 +116,58 @@ namespace Frends.MySql.Tests
 
         }
 
-        [Test, Order(2)]
-        public async Task ShouldFail_DoBasicQuery()
+        [Test, Order(3)]
+        public void ShouldThrowException_DoBasicQuery()
         {
             var q = new InputQuery
             {
                 ConnectionString = connectionString,
-                CommandText = @"select  * from tablex limit 2",
-                CommandType = MySqlCommandType.Text
+                CommandText = @"select  * from tablex limit 2"
             };
 
-            options.ThrowErrorOnFailure = false;
+
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
-
-            Assert.That(result.Success, Is.False);
-            Assert.That(result.Message.Contains("doesn't exist"));
-
-        }
-
-        [Test, Order(2)]
-        public void ShouldThrowMySqlException_DoBasicQuery()
-        {
-            var q = new InputQuery
-            {
-                ConnectionString = connectionString,
-                CommandText = @"select  * from tablex limit 2",
-                CommandType = MySqlCommandType.Text
-            };
-
-            options.ThrowErrorOnFailure = true;
-            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
-
-            MySqlException ex = Assert.ThrowsAsync<MySqlException>(() => QueryTask.ExecuteQuery(q, options, new CancellationToken()));
-            Assert.That(ex.Message.Contains("doesn't exist"));
-
+            Exception ex = Assert.ThrowsAsync<Exception>(() => QueryTask.ExecuteQuery(q, options, new CancellationToken()));
+            Assert.That(ex.Message.StartsWith("Query failed"));
         }
 
 
 
-
-
-        [Test, Order(2)]
+        [Test, Order(4)]
         public async Task ShouldSuccess_CallStoredProcedure()
         {
             var q = new InputQuery
             {
                 ConnectionString = connectionString,
-                CommandText = @"GetAllFromHodorTest",
-                CommandType = MySqlCommandType.StoredProcedure
+                CommandText = @"GetAllFromHodorTest"
+
             };
 
-            options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
+            QueryResult result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
+        }
+        [Test, Order(5)]
+        public void ShouldThrowException_CallStoredProcedure()
+        {
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString,
+                CommandText = @"GetAllFromHodorTest00"
 
-            Assert.That(result.Success, Is.True);
-            Assert.That(result.Message.Equals("0 row(s) affected"));
+            };
+
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+
+            Exception ex = Assert.ThrowsAsync<Exception>(() => QueryTask.ExecuteQuery(q, options, new CancellationToken()));
+            Assert.That(ex.Message.StartsWith("Query failed"));
 
         }
 
 
 
-        [Test, Order(3)]
+        [Test, Order(6)]
         public async Task ShouldSuccess_InsertValues()
         {
 
@@ -189,18 +177,14 @@ namespace Frends.MySql.Tests
             var q = new InputQuery
             {
                 ConnectionString = connectionString,
-                CommandText = "insert into HodorTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );",
-                CommandType = MySqlCommandType.Text
+                CommandText = "insert into HodorTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );"
 
             };
-
-            options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+            QueryResult result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-            Assert.That(result.Success, Is.True);
-            Assert.That(result.Message.Equals("1 row(s) affected"));
+            Assert.That(result.Result.ToString().Equals("1"));
 
         }
         public static string AddDoubleQuotes(string value)
@@ -208,32 +192,64 @@ namespace Frends.MySql.Tests
             return "\"" + value + "\"";
         }
 
-        //        [Test]
-        [Test, Order(3)]
+
+        [Test, Order(7)]
         public async Task ShouldSuccess_DoBasicQueryOneValue()
         {
-
-            
             var q = new InputQuery
             {
                 ConnectionString = connectionString,
-                CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' ",
-                CommandType = MySqlCommandType.Text
+                CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' limit 1 "
+
 
             };
 
-            options.ThrowErrorOnFailure = true;
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryOutput result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
-           
+            QueryResult result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+
             Assert.That(result.Result.ToString(), Is.EqualTo(@"[
   {
     ""value"": 123
   }
 ]"));
-          
+
         }
+
+        [Test, Order(8)]
+        public void ShouldThrowException_FaultyConnectionString()
+        {
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString + "nonsense",
+                CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' limit 1 "
+
+            };
+
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+
+            Exception ex = Assert.ThrowsAsync<Exception>(() => QueryTask.ExecuteQuery(q, options, new CancellationToken()));
+            Assert.That(ex.Message.StartsWith("Format of the initialization string"));
+
+        }
+        [Test, Order(9)]
+        public void ShouldThrowException_CancellationRequested()
+        {
+            var q = new InputQuery
+            {
+                ConnectionString = connectionString + "nonsense",
+                CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' limit 1 "
+
+            };
+
+            options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
+
+            Exception ex = Assert.ThrowsAsync<TaskCanceledException>(() => QueryTask.ExecuteQuery(q, options, new CancellationToken(true)));
+            Assert.That(ex.Message.StartsWith("A task was canceled"));
+
+        }
+
+
 
 
 

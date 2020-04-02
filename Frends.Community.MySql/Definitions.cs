@@ -1,24 +1,24 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json.Linq;
 
 #pragma warning disable 1591
 
 namespace Frends.MySql
 {
-    /// <summary>
-    /// Gets or sets a value indicating how the CommandText property is to be interpreted. https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandType.htm
-    /// </summary>
-    public enum MySqlCommandType 
-    { 
-        Text,
-        StoredProcedure
-    }
 
     /// <summary>
     /// Transaction isolation level to use: https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
     /// </summary>
-    public enum MySqlTransactionIsolationLevel { Default, ReadCommitted, None, Serializable, ReadUncommitted, RepeatableRead}
+    public enum MySqlTransactionIsolationLevel
+    {
+        Default,
+        ReadCommitted,
+        Serializable,
+        ReadUncommitted,
+        RepeatableRead
+    }
 
 
     public class InputQuery
@@ -30,11 +30,6 @@ namespace Frends.MySql
         [DisplayFormat(DataFormatString = "Text")]
         [DefaultValue("server=server;user=user;database=db;password=pw;")]
         public string ConnectionString { get; set; }
-
-        /// <summary>
-        /// Query type, Text or StoredProcedure
-        /// </summary>
-        public MySqlCommandType CommandType { get; set; }
 
         /// <summary>
         ///  SQL statement to execute at the data source. Usually query or name of a stored procedure. https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandText.htm
@@ -79,27 +74,18 @@ namespace Frends.MySql
         public int TimeoutSeconds { get; set; }
 
         /// <summary>
-        /// Choose if error should be thrown if Task fails.
-        /// Otherwise returns Object {Success = false }
-        /// </summary>
-        [DefaultValue(true)]
-        public bool ThrowErrorOnFailure { get; set; }
-
-        /// <summary>
         /// Transaction isolation level to use.
         /// </summary>
         public MySqlTransactionIsolationLevel MySqlTransactionIsolationLevel { get; set; }
-}
+    }
 
     /// <summary>
     /// Result to be returned from task
     /// </summary>
-    public class QueryOutput
+    public class QueryResult
     {
-        public dynamic Result { get; set; }
-        public bool Success { get; set; }
-        public string Message { get; set; }
-
+        public JToken Result { get; set; }
     }
+
 
 }

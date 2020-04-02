@@ -5,7 +5,7 @@
     <Company>HiQ Finland</Company>
     <Description>Task for performing MySql queries</Description>
     <Version>0.0.15</Version>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
