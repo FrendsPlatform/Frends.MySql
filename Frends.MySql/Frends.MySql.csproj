@@ -4,17 +4,17 @@
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <Company>HiQ Finland</Company>
     <Description>Task for performing MySql queries</Description>
-    <Version>0.0.15</Version>
+    <Version>0.0.17</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\Frends.Community.Mysql.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.0\Frends.Mysql.xml</DocumentationFile>
     <OutputPath></OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Frends.Community.Mysql.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Frends.Mysql.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
@@ -32,5 +32,7 @@
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties frendstaskmetadata_1json__JsonSchema="http://json.schemastore.org/azure-iot-edge-deployment-template-2.0" /></VisualStudio></ProjectExtensions>
 
 </Project>

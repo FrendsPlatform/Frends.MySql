@@ -21,7 +21,7 @@ namespace Frends.MySql
     }
 
 
-    public class InputQuery
+    public class QueryInput
     {
         /// <summary>
         /// Mysql connection string
@@ -78,14 +78,7 @@ namespace Frends.MySql
         /// </summary>
         public MySqlTransactionIsolationLevel MySqlTransactionIsolationLevel { get; set; }
     }
-
-    /// <summary>
-    /// Result to be returned from task
-    /// </summary>
-    public class QueryResult
-    {
-        public JToken Result { get; set; }
-    }
+    
 
 
 }

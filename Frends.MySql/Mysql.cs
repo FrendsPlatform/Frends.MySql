@@ -29,8 +29,8 @@ namespace Frends.MySql
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Object { bool Success, string Message, JToken Result }</returns>
-        public static async Task<QueryResult> ExecuteQuery(
-            [PropertyTab] InputQuery query,
+        public static async Task<JToken> ExecuteQuery(
+            [PropertyTab] QueryInput query,
             [PropertyTab] Options options,
             CancellationToken cancellationToken)
         {
@@ -46,8 +46,8 @@ namespace Frends.MySql
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Object { bool Success, string Message, JToken Result }</returns>
-        public static async Task<QueryResult> ExecuteProcedure(
-            [PropertyTab] InputQuery query,
+        public static async Task<JToken> ExecuteProcedure(
+            [PropertyTab] QueryInput query,
             [PropertyTab] Options options,
             CancellationToken cancellationToken)
         {
@@ -59,7 +59,7 @@ namespace Frends.MySql
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security",
             "CA2100:Review SQL queries for security vulnerabilities", Justification =
                 "One is able to write quereis in FRENDS. It is up to a FRENDS process prevent injections.")]
-        private static async Task<QueryResult> GetMySqlCommandResult(
+        private static async Task<JToken> GetMySqlCommandResult(
             string query, string connectionString, IEnumerable<Parameter> parameters,
             Options options,
             CommandType commandType,
@@ -123,7 +123,7 @@ namespace Frends.MySql
 
                                     trans.Commit();
 
-                                    return new QueryResult { Result = JToken.FromObject(affectedRows) };
+                                    return JToken.FromObject(affectedRows);
 
                                 }
                                 catch (Exception ex)
@@ -147,7 +147,7 @@ namespace Frends.MySql
 
                                     trans.Commit();
 
-                                    return new QueryResult { Result = JToken.FromObject(result) };
+                                    return JToken.FromObject(result);
                                 }
                                 catch (Exception ex)
                                 {
@@ -161,6 +161,7 @@ namespace Frends.MySql
                         }
 
                     }
+
                 }
             }
             catch (Exception ex)

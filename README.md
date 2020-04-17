@@ -1,12 +1,11 @@
-# Frends.Community.MySql
+# Frends.MySql
 
 FRENDS Task for connecting to MySql database
 
 - [Installing](#installing)
 - [Task](#tasks)
   - [ExecuteQuery](#executequery)
-  - [ExecuteNonQuery](#ExecuteNonQuery)
-  - [ExecuteScalar](#ExecuteScalar)
+  - [ExecuteProcedure](#ExecuteProcedure) 
 - [Building](#building)
 - [Contributing](#contributing)
 - [Change Log](#change-log)
@@ -21,11 +20,10 @@ You can install the task via FRENDS UI Task view, by searching for packages. You
 
 Execute queries against the MySql database and return result of query in JToken.
 
-### InputQuery Properties
+### QueryInput Properties
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | Connection string | string | MySql database connection string | `server=<<your host>>;uid=<<your username>>;pwd=<<your password>>;database=<<your database name>>;` |
-| CommandType | enum<> | Indicates is the CommandText interpreted as text (usually query) or as a stored procedure). Possible values are `Text` and `StoredProcedure`. More info [here]( https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandType.htm). | `Text`|
 | CommandText | string | SQL statement to execute at the data source. Usually query or name of a stored procedure. More info [here]( https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandText.htm). | `SELECT * FROM Table WHERE field = @paramName` |
 | Parameters | array[Query Parameter] | Possible parameters. See bellow. |  |
 
@@ -42,25 +40,23 @@ Execute queries against the MySql database and return result of query in JToken.
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | Timeout seconds | int | Query timeout in seconds | `60` |
-| Throw error on failure | bool | Specify if Exception should be thrown when an error occurs. If set to *false*, task outcome can be checked from #result.Success property. | `false` 
-| MySqlTransactionIsolationLevel | enum<> | Possible Transaction isolation level values are: `Default`, `ReadCommitted`, `None`, `Serializable`, `ReadUncommitted`, `RepeatableRead`. None means that queries are not made inside a transaction. Other levels are explained [here]( https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html) | `None`
+| Throw error on failure | bool | Specify if Exception should be thrown when an error occurs. | `false` 
+| MySqlTransactionIsolationLevel | enum<> | Possible Transaction isolation level values are: `Default`, `ReadCommitted`, `Serializable`, `ReadUncommitted`, `RepeatableRead`. None means that queries are not made inside a transaction. Other levels are explained [here]( https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html) | `None`
 
 ### Output
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
-| Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
-| Message | string | Error message. Always null, if Throw error on failure is set to true. | `true` |
-| Result | JToken | Query result in JToken | `[{ "Name": "Teela", "Age": 42, "Address": "Test road 123" }, { "Name": "Adam", "Age": 42, "Address": null }]` |
+| Result | JToken | Query result in JToken | `[{ "Name": "Teela", "Age": 42, "Address": "Test road 123" }, { "Name": "Adam", "Age": 42, "Address": null }]` in case of update, insert, drop, truncate, create or alter queries result will be the number of affected rows |
 
 To access query result, use
 
 ```
-#result.Result
+#result
 ```
 
-## ExecuteNonQuery
+## ExecuteProcedure
 
-Executes non querry ( UPDATE, INSERT, and DELETE) the return value is the number of rows affected by the command. For all other types of statements, the return value is -1.
+Inteded to run stored procedures
 
 ### Parameter Properties
 
@@ -70,19 +66,13 @@ Same as in ExecuteQuery: See [Query Parameter](#query-parameter)
 
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
-| Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
-| Message | string | Error message. Always null, if Throw error on failure is set to true. | `true` |
 | Result | Int | the return value is the number of rows affected by the command. For all other types of statements, the return value is -1.  | `5` |
 
 To access query result, use 
 
 ```
-#result.Result
+#result
 ```
-
-## ExecuteScalar
-
- Executes the query, and returns the first column of the first row in the result set returned by the query. Extra columns or rows are ignored. 
 
 ### Parameter Properties
 
@@ -92,21 +82,19 @@ Same as in ExecuteQuery: See [Query Parameter](#query-parameter)
 
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
-| Success | bool | Indicates wheather or no errors query is executed succesfully. Always true, if Throw error on failure is set to true. | `true` |
-| Message | string | Error message. Always null, if Throw error on failure is set to true. | `true` |
 | Result | dynamic <int, double, etc.> | The first column of the first row in the result set returned by the query. Extra columns or rows are ignored.  | `5` |
 
 To access query result, use
 
 ```
-#result.Result
+#result
 ```
 
 # Building
 
 Clone a copy of the repo
 
-`git clone https://github.com/CommunityHiQ/Frends.Community.MySQL.git`
+`git clone https://github.com/CommunityHiQ/Frends.MySQL.git`
 
 Rebuild the project
 

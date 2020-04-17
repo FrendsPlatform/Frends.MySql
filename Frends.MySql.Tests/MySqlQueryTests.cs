@@ -92,7 +92,7 @@ namespace Frends.MySql.Tests
         [Test, Order(2)]
         public async Task ShouldSuccess_DoBasicQuery()
         {
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString,
                 CommandText = @"select  * from hodortest limit 2"
@@ -101,9 +101,9 @@ namespace Frends.MySql.Tests
 
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryResult result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+            var result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-            Assert.That(result.Result.ToString(), Is.EqualTo(@"[
+            Assert.That(result.ToString(), Is.EqualTo(@"[
   {
     ""name"": ""hodor"",
     ""value"": 123
@@ -119,7 +119,7 @@ namespace Frends.MySql.Tests
         [Test, Order(3)]
         public void ShouldThrowException_DoBasicQuery()
         {
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString,
                 CommandText = @"select  * from tablex limit 2"
@@ -137,7 +137,7 @@ namespace Frends.MySql.Tests
         [Test, Order(4)]
         public async Task ShouldSuccess_CallStoredProcedure()
         {
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString,
                 CommandText = @"GetAllFromHodorTest"
@@ -146,12 +146,12 @@ namespace Frends.MySql.Tests
 
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryResult result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
+           var result = await QueryTask.ExecuteProcedure(q, options, new CancellationToken());
         }
         [Test, Order(5)]
         public void ShouldThrowException_CallStoredProcedure()
         {
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString,
                 CommandText = @"GetAllFromHodorTest00"
@@ -174,7 +174,7 @@ namespace Frends.MySql.Tests
             string rndName = Path.GetRandomFileName();
             Random rnd = new Random();
             int rndValue = rnd.Next(1000);
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString,
                 CommandText = "insert into HodorTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );"
@@ -182,9 +182,9 @@ namespace Frends.MySql.Tests
             };
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryResult result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+            var result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-            Assert.That(result.Result.ToString().Equals("1"));
+            Assert.That(result.ToString().Equals("1"));
 
         }
         public static string AddDoubleQuotes(string value)
@@ -196,7 +196,7 @@ namespace Frends.MySql.Tests
         [Test, Order(7)]
         public async Task ShouldSuccess_DoBasicQueryOneValue()
         {
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString,
                 CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' limit 1 "
@@ -206,9 +206,9 @@ namespace Frends.MySql.Tests
 
             options.MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.Default;
 
-            QueryResult result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
+            var result = await QueryTask.ExecuteQuery(q, options, new CancellationToken());
 
-            Assert.That(result.Result.ToString(), Is.EqualTo(@"[
+            Assert.That(result.ToString(), Is.EqualTo(@"[
   {
     ""value"": 123
   }
@@ -219,7 +219,7 @@ namespace Frends.MySql.Tests
         [Test, Order(8)]
         public void ShouldThrowException_FaultyConnectionString()
         {
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString + "nonsense",
                 CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' limit 1 "
@@ -235,7 +235,7 @@ namespace Frends.MySql.Tests
         [Test, Order(9)]
         public void ShouldThrowException_CancellationRequested()
         {
-            var q = new InputQuery
+            var q = new QueryInput
             {
                 ConnectionString = connectionString + "nonsense",
                 CommandText = "SELECT value FROM HodorTest WHERE name LIKE 'hodor' limit 1 "
