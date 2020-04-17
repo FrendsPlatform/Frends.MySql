@@ -41,26 +41,21 @@ Execute queries against the MySql database and return result of query in JToken.
 | ------------| -----------| --------------- | ------- |
 | Timeout seconds | int | Query timeout in seconds | `60` |
 | Throw error on failure | bool | Specify if Exception should be thrown when an error occurs. | `false` 
-| MySqlTransactionIsolationLevel | enum<> | Possible Transaction isolation level values are: `Default`, `ReadCommitted`, `Serializable`, `ReadUncommitted`, `RepeatableRead`. None means that queries are not made inside a transaction. Other levels are explained [here]( https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html) | `None`
+| MySqlTransactionIsolationLevel | enum<> | Possible Transaction isolation level values are: `Default`, `ReadCommitted`, `Serializable`, `ReadUncommitted`, `RepeatableRead`. Levels are explained [here]( https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html) | `Default`
 
 ### Output
 | Property    | Type       | Description     | Example |
 | ------------| -----------| --------------- | ------- |
 | Result | JToken | Query result in JToken | `[{ "Name": "Teela", "Age": 42, "Address": "Test road 123" }, { "Name": "Adam", "Age": 42, "Address": null }]` in case of update, insert, drop, truncate, create or alter queries result will be the number of affected rows |
 
-To access query result, use
-
-```
-#result
-```
 
 ## ExecuteProcedure
 
-Inteded to run stored procedures
+Intended to run stored procedures
 
 ### Parameter Properties
 
-Same as in ExecuteQuery: See [Query Parameter](#query-parameter)
+Same as in ExecuteQuery: See [Parameter Properties](#executequery)
 
 ### Output
 
@@ -68,27 +63,6 @@ Same as in ExecuteQuery: See [Query Parameter](#query-parameter)
 | ------------| -----------| --------------- | ------- |
 | Result | Int | the return value is the number of rows affected by the command. For all other types of statements, the return value is -1.  | `5` |
 
-To access query result, use 
-
-```
-#result
-```
-
-### Parameter Properties
-
-Same as in ExecuteQuery: See [Query Parameter](#query-parameter) 
-
-### Output
-
-| Property    | Type       | Description     | Example |
-| ------------| -----------| --------------- | ------- |
-| Result | dynamic <int, double, etc.> | The first column of the first row in the result set returned by the query. Extra columns or rows are ignored.  | `5` |
-
-To access query result, use
-
-```
-#result
-```
 
 # Building
 
