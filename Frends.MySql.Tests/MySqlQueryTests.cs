@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Extensions;
 using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
 
 namespace Frends.MySql.Tests
 {
@@ -16,9 +15,7 @@ namespace Frends.MySql.Tests
     // [Ignore("Cannot be run unless you have a properly configured MySql DB running on your local computer")]
     public class MySqlQueryTests
     {
-        // Problems with local MySql, tests not implemented yet
-
-        private string connectionString = "server=localhost;uid=root;pwd=kissa001;database=test;";
+        private string connectionString = "server=localhost;uid=root;pwd=pw;database=test;";
 
         Options options = new Options
         {
@@ -50,7 +47,6 @@ namespace Frends.MySql.Tests
                     {
                         await command.ExecuteNonQueryAsync();
                     }
-
                     using (var command = new MySqlCommand("DROP PROCEDURE IF EXISTS GetAllFromHodorTest; CREATE PROCEDURE GetAllFromHodorTest() BEGIN SELECT * FROM HodorTest; END", connection))
                     {
                         await command.ExecuteNonQueryAsync();
@@ -248,10 +244,6 @@ namespace Frends.MySql.Tests
             Assert.That(ex.Message.StartsWith("A task was canceled"));
 
         }
-
-
-
-
 
     }
 }
