@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Frends.Salesforce.ExecuteQuery</name>
+    </assembly>
+    <members>
+        <member name="T:Frends.Salesforce.ExecuteQuery.Definitions.AuthenticationMethod">
+            <summary>
+            Authentication options to authenticate to Salesforce.
+            </summary>
+        </member>
+        <member name="F:Frends.Salesforce.ExecuteQuery.Definitions.AuthenticationMethod.AccessToken">
+            <summary>
+            Authenticate with access token.
+            </summary>
+        </member>
+        <member name="F:Frends.Salesforce.ExecuteQuery.Definitions.AuthenticationMethod.OAuth2WithPassword">
+            <summary>
+            Authenticate by providing required informations to fetch OAuth2 access token.
+            </summary>
+        </member>
+        <member name="T:Frends.Salesforce.ExecuteQuery.Input">
+            <summary>
+            Input-class for ExecuteQuery-task.
+            </summary>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Input.Domain">
+            <summary>
+            Salesforce Domain.
+            /services/data/v52.0/query will be added automatically, so the domain is enough.
+            </summary>
+            <example>https://example.my.salesforce.com</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Input.Query">
+            <summary>
+            Query which will be executed.
+            </summary>
+            <example>SELECT Name from Customer</example>
+        </member>
+        <member name="T:Frends.Salesforce.ExecuteQuery.Options">
+            <summary>
+            Options-class for ExecuteQuery-task.
+            </summary>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.AuthenticationMethod">
+            <summary>
+            Authentication method.
+            </summary>
+            <example>AccessToken</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.AccessToken">
+            <summary>
+            OAuth2 access token.
+            </summary>
+            <example>abcdefghijkl123456789</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.AuthUrl">
+            <summary>
+            URL to fetch OAuth2 token.
+            </summary>
+            <example>https://login.salesforce.com/services/oauth2/token</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.ClientID">
+            <summary>
+            Client ID to get OAuth2 token.
+            </summary>
+            <example>abcdefghijkl123456789</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.ClientSecret">
+            <summary>
+            Client secret to get OAuth2 access token.
+            </summary>
+            <example>abcdefghijkl123456789</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.Username">
+            <summary>
+            Username of the user which will be used to fetch OAuth2 access token.
+            </summary>
+            <example>username123</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.Password">
+            <summary>
+            Password for the user.
+            </summary>
+            <example>password123</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.SecurityToken">
+            <summary>
+            Security token for the user, which is required to add with the password by Salesforce.
+            </summary>
+            <example>abcdefghijkl123456789</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.ReturnAccessToken">
+            <summary>
+            Also return access token which is fetched during authentication?
+            </summary>
+            <example>true</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Options.ThrowAnErrorIfNotFound">
+            <summary>
+            Set whether process will throw an error if targeted id can not be found from Salesforce.
+            </summary>
+            <example>true</example>
+        </member>
+        <member name="T:Frends.Salesforce.ExecuteQuery.Result">
+            <summary>
+            Result-class for ExecuteQuery-task.
+            </summary>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Result.Body">
+            <summary>
+            Body of the response.
+            </summary>
+            <example>{"id": "abcdefghijkl123456789",  "success": true,  "errors": []}</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Result.RequestIsSuccessful">
+            <summary>
+            Was the request successful?
+            </summary>
+            <example>true</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Result.ErrorException">
+            <summary>
+            Exception that was thrown by the server.
+            </summary>
+            <example>System.Net.Http.HttpRequestException</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Result.ErrorMessage">
+            <summary>
+            Error message from the server.
+            </summary>
+            <example>System.Net.Http.HttpRequestException: Request failed with status code Unauthorized</example>
+        </member>
+        <member name="P:Frends.Salesforce.ExecuteQuery.Result.Token">
+            <summary>
+            OAuth2 access token.
+            </summary>
+            <example>abcdefghjklmn123456789</example>
+        </member>
+        <member name="T:Frends.Salesforce.ExecuteQuery.Salesforce">
+            <summary>
+            Tasks class.
+            </summary>
+        </member>
+        <member name="M:Frends.Salesforce.ExecuteQuery.Salesforce.ExecuteQuery(Frends.Salesforce.ExecuteQuery.Input,Frends.Salesforce.ExecuteQuery.Options,System.Threading.CancellationToken)">
+            <summary>
+            Execute a query to Salesforce.
+            [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.Salesforce.ExecuteQuery)
+            </summary>
+            <param name="input">Information to update the sobject.</param>
+            <param name="options">Information about the salesforce destination.</param>
+            <param name="cancellationToken"></param>
+            <returns>Object { JObject Body, bool RequestIsSuccessful, Exception ErrorException, string ErrorMessage, string Token }</returns>
+        </member>
+        <member name="M:Frends.Salesforce.ExecuteQuery.Salesforce.GetAccessToken(System.String,System.String,System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Get OAuth2 access token.
+            This method is public since it is used also in Unit tests.
+            </summary>
+        </member>
+    </members>
+</doc>

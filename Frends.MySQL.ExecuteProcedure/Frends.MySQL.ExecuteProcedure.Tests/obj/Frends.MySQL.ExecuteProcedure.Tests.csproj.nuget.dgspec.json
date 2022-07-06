@@ -1,0 +1,185 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.Tests\\Frends.MySQL.ExecuteProcedure.Tests.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.Tests\\Frends.MySQL.ExecuteProcedure.Tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.Tests\\Frends.MySQL.ExecuteProcedure.Tests.csproj",
+        "projectName": "Frends.MySQL.ExecuteProcedure.Tests",
+        "projectPath": "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.Tests\\Frends.MySQL.ExecuteProcedure.Tests.csproj",
+        "packagesPath": "C:\\Users\\ahlstve\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.Tests\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\ahlstve\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.csproj": {
+                "projectPath": "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "MSTest.TestAdapter": {
+              "target": "Package",
+              "version": "[2.1.2, )"
+            },
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.1.2, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[16.7.0, )"
+            },
+            "NUnit3TestAdapter": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.17.0, )"
+            },
+            "coverlet.collector": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.1.0, )"
+            },
+            "nunit": {
+              "target": "Package",
+              "version": "[3.12.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.csproj": {
+      "version": "1.0.1",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.csproj",
+        "projectName": "Frends.MySQL.ExecuteProcedure",
+        "projectPath": "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure.csproj",
+        "packagesPath": "C:\\Users\\ahlstve\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ahlstve\\source\\repos\\Frends.MySQL\\Frends.MySQL.ExecuteProcedure\\Frends.MySQL.ExecuteProcedure\\obj\\",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\ahlstve\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.CSharp": {
+              "target": "Package",
+              "version": "[4.7.0, )"
+            },
+            "Microsoft.CrmSdk.CoreAssemblies": {
+              "target": "Package",
+              "version": "[9.0.2.45, )"
+            },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.0.29, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[107.3.0, )"
+            },
+            "System.ComponentModel.Annotations": {
+              "target": "Package",
+              "version": "[4.7.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
