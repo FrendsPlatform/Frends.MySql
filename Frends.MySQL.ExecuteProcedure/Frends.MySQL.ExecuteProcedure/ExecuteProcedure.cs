@@ -1,7 +1,5 @@
 ﻿using Frends.MySQL.ExecuteProcedure.Definitions;
-using Microsoft.Xrm.Sdk.Messages;
 using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
@@ -11,8 +9,6 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
-using System.Net;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -113,26 +109,28 @@ public class MySQL
 
                         }
                     }
-
-                    using (var trans = conn.BeginTransaction(isolationLevel))
+                    else
                     {
-                        try
+                        using (var trans = conn.BeginTransaction(isolationLevel))
                         {
-                            var result = await conn.QueryAsync(input.Query, parameterObject, trans, command.CommandTimeout, command.CommandType)
-                                .ConfigureAwait(false);
+                            try
+                            {
+                                var result = await conn.QueryAsync(input.Query, parameterObject, trans, command.CommandTimeout, command.CommandType)
+                                    .ConfigureAwait(false);
 
-                            trans.Commit();
+                                trans.Commit();
 
-                            return JToken.FromObject(result);
+                                return JToken.FromObject(result);
+                            }
+                            catch (Exception ex)
+                            {
+                                trans.Rollback();
+                                trans.Dispose();
+                                throw new Exception("Query failed " + ex.Message);
+
+                            }
+
                         }
-                        catch (Exception ex)
-                        {
-                            trans.Rollback();
-                            trans.Dispose();
-                            throw new Exception("Query failed " + ex.Message);
-
-                        }
-
                     }
 
                 }
