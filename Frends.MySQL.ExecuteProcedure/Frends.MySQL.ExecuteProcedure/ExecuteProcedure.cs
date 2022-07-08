@@ -88,15 +88,19 @@ public class MySQL
                         {
                             try
                             {
-                                var command1 = conn.CreateCommand();
-                                command1.CommandTimeout = command.CommandTimeout;
-                                command1.CommandText = input.Query;
-                                command1.CommandType = command.CommandType;
-                                var affectedRows = await conn.ExecuteAsync(command1, parameterObject, trans);
+                                command.Connection = conn;
+                                command.Transaction = trans;
+
+                                command.CommandText = input.Query;
+                                foreach (var value in parameterObject) {
+                                    command.Parameters.AddWithValue(value.Key, value.Value);
+                                }
+
+                                var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
 
                                 trans.Commit();
 
-                                return JToken.FromObject(affectedRows);
+                                return new Result(affectedRows);
 
                             }
                             catch (Exception ex)
