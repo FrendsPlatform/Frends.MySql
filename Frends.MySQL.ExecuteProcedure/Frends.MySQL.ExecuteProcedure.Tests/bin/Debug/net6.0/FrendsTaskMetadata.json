@@ -1,7 +1,7 @@
 {
   "Tasks": [
     {
-      "TaskMethod": "Frends.Salesforce.ExecuteQuery.Salesforce.ExecuteQuery"
+      "TaskMethod": "Frends.MySQL.ExecuteProcedure.MySQL.ExecuteProcedure"
     }
   ]
 }

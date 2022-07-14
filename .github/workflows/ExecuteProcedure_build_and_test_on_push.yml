@@ -1,0 +1,25 @@
+name: ExecuteProcedure_push
+
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - 'Frends.MySQL.ExecuteProcedure/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: FrendsPlatform/FrendsTasks/.github/workflows/build_test.yml@main
+    with:
+      workdir: Frends.MySQL.ExecuteProcedure
+      env_var_name_1: MySQL_server
+      env_var_name_2: MySQL_uid
+      env_var_name_3: MySQL_pwd
+      env_var_name_4: MySQL_database
+    secrets:
+      badge_service_api_key: ${{ secrets.BADGE_SERVICE_API_KEY }}
+      env_var_value_1: ${{ secrets.MYSQL_SERVER }}
+      env_var_value_2: ${{ secrets.MYSQL_UID }}
+      env_var_value_3: ${{ secrets.MYSQL_PWD }}
+      env_var_value_4: ${{ secrets.MYSQL_DATABASE }}

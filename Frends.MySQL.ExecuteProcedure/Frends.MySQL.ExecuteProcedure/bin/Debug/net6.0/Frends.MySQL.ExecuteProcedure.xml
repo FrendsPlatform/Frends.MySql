@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Frends.MySQL.ExecuteProcedure</name>
+    </assembly>
+    <members>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Input.ConnectionString">
+            <summary>
+            Mysql connection string
+            </summary>
+            <example>server=server;user=user;database=db;password=pw;</example>
+        </member>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Input.Query">
+            <summary>
+             SQL statement to execute at the data source. Usually query or name of a stored procedure. https://dev.mysql.com/doc/dev/connector-net/8.0/html/P_MySql_Data_MySqlClient_MySqlCommand_CommandText.htm
+            </summary>
+            <example>SELECT ColumnName FROM TableName</example>
+        </member>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Input.Parameters">
+            <summary>
+            Parameters for the database query
+            </summary>
+        </member>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Options.TimeoutSeconds">
+            <summary>
+            Timeout value in seconds
+            </summary>
+            <example>30</example>
+        </member>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Options.TransactionIsolationLevel">
+            <summary>
+            Transaction isolation level to use.
+            </summary>
+        </member>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Parameter.Name">
+            <summary>
+            The name of the parameter
+            </summary>
+        </member>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Parameter.Value">
+            <summary>
+            The value of the parameter
+            </summary>
+        </member>
+        <member name="T:Frends.MySQL.ExecuteProcedure.MySQL">
+            <summary>
+            Tasks class.
+            </summary>
+        </member>
+    </members>
+</doc>
