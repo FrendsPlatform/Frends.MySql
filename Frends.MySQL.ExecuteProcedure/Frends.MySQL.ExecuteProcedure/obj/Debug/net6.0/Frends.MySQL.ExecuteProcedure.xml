@@ -42,6 +42,12 @@
             The value of the parameter
             </summary>
         </member>
+        <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Result.AffectedRows">
+            <summary>
+            Count of affected rows
+            </summary>
+            <example>10</example>
+        </member>
         <member name="T:Frends.MySQL.ExecuteProcedure.MySQL">
             <summary>
             Tasks class.

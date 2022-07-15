@@ -12,4 +12,4 @@ C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.xml
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.pdb
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure\obj\Debug\net6.0\ref\Frends.MySQL.ExecuteProcedure.dll
-C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure\bin\Debug\net6.0\ref\Frends.MySQL.ExecuteProcedure.dll
+C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure\obj\Debug\net6.0\refint\Frends.MySQL.ExecuteProcedure.dll

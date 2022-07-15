@@ -49,6 +49,7 @@ namespace Frends.MySQL.ExecuteProcedure
                     {
                         foreach (var parameter in input.Parameters)
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             parameterObject.Add(parameter.Name, parameter.Value);
                         }
 
@@ -58,6 +59,12 @@ namespace Frends.MySQL.ExecuteProcedure
                     {
                         command.CommandTimeout = options.TimeoutSeconds;
                         command.CommandType = CommandType.StoredProcedure;
+
+                        foreach (var value in parameterObject)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            command.Parameters.AddWithValue(value.Key, value.GetType()).Value = value.Value;
+                        }
 
                         IsolationLevel isolationLevel;
                         switch (options.TransactionIsolationLevel)
@@ -86,16 +93,8 @@ namespace Frends.MySQL.ExecuteProcedure
                             {
                                 try
                                 {
-                                    command.Connection = conn;
-                                    command.Transaction = trans;
-
-                                    command.CommandText = input.Query;
-                                    foreach (var value in parameterObject)
-                                    {
-                                        command.Parameters.AddWithValue(value.Key, value.Value);
-                                    }
-
-                                    var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
+                                    var affectedRows = await command.ExecuteNonQueryAsync();
+                                    Console.WriteLine("Scalar " + affectedRows);
 
                                     trans.Commit();
 
@@ -118,16 +117,8 @@ namespace Frends.MySQL.ExecuteProcedure
                             {
                                 try
                                 {
-                                    command.Connection = conn;
-                                    command.Transaction = trans;
-
-                                    command.CommandText = input.Query;
-                                    foreach (var value in parameterObject)
-                                    {
-                                        command.Parameters.AddWithValue(value.Key, value.Value);
-                                    }
-
-                                    var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                                    var affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                                    Console.WriteLine(affectedRows);
 
                                     trans.Commit();
 
