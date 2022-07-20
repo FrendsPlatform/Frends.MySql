@@ -32,7 +32,6 @@ namespace Frends.MySQL.ExecuteProcedure.Tests
             private string _connectionString;
 
             [OneTimeSetUp]
-            //[Test, Order(1)]
             public async Task OneTimeSetUp()
             {
                 _connectionString = "server=" + _server + ";uid=" + _uid + ";pwd=" + _pwd + ";database=" + _database + ";";
@@ -66,7 +65,6 @@ namespace Frends.MySQL.ExecuteProcedure.Tests
 
 #if false
             [OneTimeTearDown]
-            //[Test, Order(50)]
             public async Task OneTimeTearDown()
             {
                 using (var connection = new MySqlConnection(_connectionString))
@@ -89,7 +87,7 @@ namespace Frends.MySQL.ExecuteProcedure.Tests
             }
 #endif
 
-            [Test, Order(4)]
+            [Test]
             public async Task ShouldSuccess_CallStoredProcedure()
             {
                 var input = new Input
@@ -106,13 +104,13 @@ namespace Frends.MySQL.ExecuteProcedure.Tests
                 Assert.That(result.ToString().Equals("TODO"));
             }
 
-            [Test, Order(5)]
+            [Test]
             public void ShouldThrowException_CallStoredProcedure()
             {
                 var input = new Input
                 {
                     ConnectionString = _connectionString,
-                    Query = @"GetAllFromHodorTest00"
+                    Query = @"call GetAllFromHodorTest00"
 
                 };
 
@@ -123,7 +121,7 @@ namespace Frends.MySQL.ExecuteProcedure.Tests
 
             }
 
-            [Test, Order(8)]
+            [Test]
             public void ShouldThrowException_FaultyConnectionString()
             {
                 var q = new Input
@@ -139,7 +137,7 @@ namespace Frends.MySQL.ExecuteProcedure.Tests
                 Assert.That(ex != null && ex.Message.StartsWith("Format of the initialization string"));
 
             }
-            [Test, Order(9)]
+            [Test]
             public void ShouldThrowException_CancellationRequested()
             {
                 var input = new Input

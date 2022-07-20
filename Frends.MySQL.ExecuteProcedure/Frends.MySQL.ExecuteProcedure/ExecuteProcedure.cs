@@ -27,7 +27,7 @@ namespace Frends.MySQL.ExecuteProcedure
         /// </summary>
         /// <param name="input"></param>
         /// <param name="options"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken"/>
         /// <returns>Object { int AffectedRows }</returns>
         public static async Task<Result> ExecuteProcedure(
             [PropertyTab] Input input,
@@ -35,8 +35,6 @@ namespace Frends.MySQL.ExecuteProcedure
             CancellationToken cancellationToken
         )
         {
-            var scalarReturnQueries = new[] { "update ", "insert ", "drop ", "truncate ", "create ", "alter " };
-
             try
             {
                 using (var conn = new MySqlConnection(input.ConnectionString))
@@ -86,55 +84,27 @@ namespace Frends.MySQL.ExecuteProcedure
                                 break;
                         }
 
-                        if (scalarReturnQueries.Any(input.Query.TrimStart().ToLower().Contains) || command.CommandType == CommandType.StoredProcedure)
+                        // scalar return
+                        using (var trans = conn.BeginTransaction(isolationLevel))
                         {
-                            // scalar return
-                            using (var trans = conn.BeginTransaction(isolationLevel))
+                            try
                             {
-                                try
-                                {
-                                    var affectedRows = await command.ExecuteNonQueryAsync();
-                                    Console.WriteLine("Scalar " + affectedRows);
+                                var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
+                                Console.WriteLine("Scalar " + affectedRows);
 
-                                    trans.Commit();
+                                trans.Commit();
 
-                                    return new Result(affectedRows);
+                                return new Result(0);
 
-                                }
-                                catch (Exception ex)
-                                {
-                                    trans.Rollback();
-                                    trans.Dispose();
-                                    throw new Exception("Query failed " + ex.Message);
-
-                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                trans.Rollback();
+                                trans.Dispose();
+                                throw new Exception("Query failed " + ex.Message);
 
                             }
                         }
-                        else
-                        {
-                            using (var trans = conn.BeginTransaction(isolationLevel))
-                            {
-                                try
-                                {
-                                    var affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-                                    Console.WriteLine(affectedRows);
-
-                                    trans.Commit();
-
-                                    return new Result(affectedRows);
-                                }
-                                catch (Exception ex)
-                                {
-                                    trans.Rollback();
-                                    trans.Dispose();
-                                    throw new Exception("Query failed " + ex.Message);
-
-                                }
-
-                            }
-                        }
-
                     }
 
                 }
