@@ -6,14 +6,13 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Frends.MySQL.ExecuteProcedure
 {
     /// <summary>
-    /// Tasks class.
+    /// Task class.
     /// </summary>
     public class MySQL
     {
@@ -37,7 +36,7 @@ namespace Frends.MySQL.ExecuteProcedure
         {
             try
             {
-                using (var conn = new MySqlConnection(input.ConnectionString))
+                using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
                 {
                     await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
                     cancellationToken.ThrowIfCancellationRequested();
@@ -84,29 +83,23 @@ namespace Frends.MySQL.ExecuteProcedure
                                 break;
                         }
 
-                        // scalar return
                         using (var trans = conn.BeginTransaction(isolationLevel))
                         {
                             try
                             {
                                 var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
-                                Console.WriteLine("Scalar " + affectedRows);
-
                                 trans.Commit();
 
-                                return new Result(0);
-
+                                return new Result(affectedRows);
                             }
                             catch (Exception ex)
                             {
                                 trans.Rollback();
                                 trans.Dispose();
                                 throw new Exception("Query failed " + ex.Message);
-
                             }
                         }
                     }
-
                 }
             }
             catch (Exception ex)
