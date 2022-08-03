@@ -49,7 +49,6 @@ namespace Frends.MySQL.ExecuteProcedure
                             cancellationToken.ThrowIfCancellationRequested();
                             parameterObject.Add(parameter.Name, parameter.Value);
                         }
-
                     }
 
                     using (var command = new MySqlCommand(input.Query, conn))
@@ -96,6 +95,7 @@ namespace Frends.MySQL.ExecuteProcedure
                             {
                                 trans.Rollback();
                                 trans.Dispose();
+
                                 throw new Exception("Query failed " + ex.Message);
                             }
                         }
