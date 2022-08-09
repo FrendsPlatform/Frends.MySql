@@ -4,6 +4,11 @@
         <name>Frends.MySQL.ExecuteProcedure</name>
     </assembly>
     <members>
+        <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.Input">
+            <summary>
+            Input class
+            </summary>
+        </member>
         <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Input.ConnectionString">
             <summary>
             Mysql connection string
@@ -21,6 +26,11 @@
             Parameters for the database query
             </summary>
         </member>
+        <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.Options">
+            <summary>
+            Options class
+            </summary>
+        </member>
         <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Options.TimeoutSeconds">
             <summary>
             Timeout value in seconds
@@ -30,6 +40,11 @@
         <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Options.TransactionIsolationLevel">
             <summary>
             Transaction isolation level to use.
+            </summary>
+        </member>
+        <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.Parameter">
+            <summary>
+            Parameter class
             </summary>
         </member>
         <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Parameter.Name">
@@ -42,16 +57,57 @@
             The value of the parameter
             </summary>
         </member>
+        <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.Result">
+            <summary>
+            Result class
+            </summary>
+        </member>
         <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Result.AffectedRows">
             <summary>
             Count of affected rows
             </summary>
             <example>10</example>
         </member>
+        <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.TransactionIsolationLevel">
+            <summary>
+            Transaction isolation level
+            </summary>
+            <example>ReadCommited</example>
+        </member>
+        <member name="F:Frends.MySQL.ExecuteProcedure.Definitions.TransactionIsolationLevel.ReadCommitted">
+            <summary>
+            Uses ReadCommited level of transaction
+            </summary>
+        </member>
+        <member name="F:Frends.MySQL.ExecuteProcedure.Definitions.TransactionIsolationLevel.Serializable">
+            <summary>
+            Uses Serializable level of transaction
+            </summary>
+        </member>
+        <member name="F:Frends.MySQL.ExecuteProcedure.Definitions.TransactionIsolationLevel.ReadUncommitted">
+            <summary>
+            Uses ReadUncommitted level of transaction
+            </summary>
+        </member>
+        <member name="F:Frends.MySQL.ExecuteProcedure.Definitions.TransactionIsolationLevel.RepeatableRead">
+            <summary>
+            Uses RepeatableRead level of transaction
+            </summary>
+        </member>
         <member name="T:Frends.MySQL.ExecuteProcedure.MySQL">
             <summary>
             Task class.
             </summary>
+        </member>
+        <member name="M:Frends.MySQL.ExecuteProcedure.MySQL.ExecuteProcedure(Frends.MySQL.ExecuteProcedure.Definitions.Input,Frends.MySQL.ExecuteProcedure.Definitions.Options,System.Threading.CancellationToken)">
+            <summary>
+            Execute a stored procedure to MySQL.
+            [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure)
+            </summary>
+            <param name="input"></param>
+            <param name="options"></param>
+            <param name="cancellationToken"/>
+            <returns>Object { int AffectedRows }</returns>
         </member>
     </members>
 </doc>

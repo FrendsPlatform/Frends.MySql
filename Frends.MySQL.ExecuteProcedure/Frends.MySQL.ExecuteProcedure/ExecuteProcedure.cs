@@ -16,10 +16,6 @@ namespace Frends.MySQL.ExecuteProcedure
     /// </summary>
     public class MySQL
     {
-
-        [SuppressMessage("Security",
-            "CA2100:Review SQL queries for security vulnerabilities", Justification =
-                "One is able to write queries in FRENDS. It is up to a FRENDS process prevent injections.")]
         /// <summary>
         /// Execute a stored procedure to MySQL.
         /// [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure)
