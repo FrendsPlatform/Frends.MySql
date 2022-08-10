@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "Frends.MySQL.ExecuteProcedure.Tests/1.0.0": {
         "dependencies": {
-          "Frends.MySQL.ExecuteProcedure": "1.0.1",
+          "Frends.MySQL.ExecuteProcedure": "1.0.0",
           "MSTest.TestAdapter": "2.1.2",
           "MSTest.TestFramework": "2.1.2",
           "Microsoft.NET.Test.Sdk": "16.7.0",
@@ -1001,7 +1001,7 @@
           }
         }
       },
-      "Frends.MySQL.ExecuteProcedure/1.0.1": {
+      "Frends.MySQL.ExecuteProcedure/1.0.0": {
         "dependencies": {
           "Microsoft.CSharp": "4.7.0",
           "Microsoft.CrmSdk.CoreAssemblies": "9.0.2.45",
@@ -1596,7 +1596,7 @@
       "path": "system.xml.xpath.xmldocument/4.3.0",
       "hashPath": "system.xml.xpath.xmldocument.4.3.0.nupkg.sha512"
     },
-    "Frends.MySQL.ExecuteProcedure/1.0.1": {
+    "Frends.MySQL.ExecuteProcedure/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

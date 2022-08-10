@@ -1609,7 +1609,7 @@
           "lib/netstandard1.3/System.Xml.XPath.XmlDocument.dll": {}
         }
       },
-      "Frends.MySQL.ExecuteProcedure/1.0.1": {
+      "Frends.MySQL.ExecuteProcedure/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
@@ -5555,7 +5555,7 @@
         "system.xml.xpath.xmldocument.nuspec"
       ]
     },
-    "Frends.MySQL.ExecuteProcedure/1.0.1": {
+    "Frends.MySQL.ExecuteProcedure/1.0.0": {
       "type": "project",
       "path": "../Frends.MySQL.ExecuteProcedure/Frends.MySQL.ExecuteProcedure.csproj",
       "msbuildProject": "../Frends.MySQL.ExecuteProcedure/Frends.MySQL.ExecuteProcedure.csproj"
@@ -5563,7 +5563,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "Frends.MySQL.ExecuteProcedure >= 1.0.1",
+      "Frends.MySQL.ExecuteProcedure >= 1.0.0",
       "MSTest.TestAdapter >= 2.1.2",
       "MSTest.TestFramework >= 2.1.2",
       "Microsoft.NET.Test.Sdk >= 16.7.0",
