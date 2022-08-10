@@ -31,6 +31,7 @@ public class MySQL
     {
         try
         {
+            // Create connection
             using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
             {
                 await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
@@ -65,9 +66,6 @@ public class MySQL
                             break;
                         case TransactionIsolationLevel.ReadUncommitted:
                             isolationLevel = IsolationLevel.ReadUncommitted;
-                            break;
-                        case TransactionIsolationLevel.RepeatableRead:
-                            isolationLevel = IsolationLevel.RepeatableRead;
                             break;
                         case TransactionIsolationLevel.Serializable:
                             isolationLevel = IsolationLevel.Serializable;
