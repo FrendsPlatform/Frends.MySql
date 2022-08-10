@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Frends.MySQL.ExecuteProcedure.Tests": {
+      "commandName": "Project"
+    }
+  }
+}

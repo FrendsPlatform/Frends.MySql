@@ -13,25 +13,26 @@ public class UnitTests
     /// THESE TESTS DO NOT WORK UNLESS YOU INSTALL MySql LOCALLY ON YOUR OWN COMPUTER!
     /// </summary>
     [TestClass]
-    #if false
-    [Ignore("Cannot be run unless you have a properly configured MySql DB running on your local computer")]
-    #endif
+#if false
+[Ignore("Cannot be run unless you have a properly configured MySql DB running on your local computer")]
+#endif
     public class MySqlQueryTests
     {
         private readonly string _server = Environment.GetEnvironmentVariable("MySQL_server");
         private readonly string _uid = Environment.GetEnvironmentVariable("MySQL_uid");
         private readonly string _pwd = Environment.GetEnvironmentVariable("MySQL_pwd");
         private readonly string _database = Environment.GetEnvironmentVariable("MySQL_database");
-        readonly Options _options = new Options
-        {
-            TimeoutSeconds = 300
-        };
+        private Options _options;
         private string _connectionString;
 
         [TestInitialize]
         public async Task OneTimeSetUp()
         {
             _connectionString = "server=" + _server + ";uid=" + _uid + ";pwd=" + _pwd + ";database=" + _database + ";";
+            _options = new Options
+            {
+                TimeoutSeconds = 300
+            };
 
             using (var connection = new MySqlConnection(_connectionString))
             {

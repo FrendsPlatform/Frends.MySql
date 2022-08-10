@@ -4,105 +4,103 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Frends.MySQL.ExecuteProcedure
+namespace Frends.MySQL.ExecuteProcedure;
+
+/// <summary>
+/// Task class.
+/// </summary>
+public class MySQL
 {
     /// <summary>
-    /// Task class.
+    /// Execute a stored procedure to MySQL.
+    /// [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure)
     /// </summary>
-    public class MySQL
+    /// <param name="input"></param>
+    /// <param name="options"></param>
+    /// <param name="cancellationToken"/>
+    /// <returns>Object { int AffectedRows }</returns>
+    public static async Task<Result> ExecuteProcedure(
+        [PropertyTab] Input input,
+        [PropertyTab] Options options,
+        CancellationToken cancellationToken
+    )
     {
-        /// <summary>
-        /// Execute a stored procedure to MySQL.
-        /// [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure)
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="options"></param>
-        /// <param name="cancellationToken"/>
-        /// <returns>Object { int AffectedRows }</returns>
-        public static async Task<Result> ExecuteProcedure(
-            [PropertyTab] Input input,
-            [PropertyTab] Options options,
-            CancellationToken cancellationToken
-        )
+        try
         {
-            try
+            using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
             {
-                using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
-                {
-                    await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
-                    cancellationToken.ThrowIfCancellationRequested();
+                await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
 
-                    IDictionary<string, object> parameterObject = new ExpandoObject();
-                    if (input.Parameters != null)
+                IDictionary<string, object> parameterObject = new ExpandoObject();
+                if (input.Parameters != null)
+                {
+                    foreach (var parameter in input.Parameters)
                     {
-                        foreach (var parameter in input.Parameters)
-                        {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            parameterObject.Add(parameter.Name, parameter.Value);
-                        }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        parameterObject.Add(parameter.Name, parameter.Value);
+                    }
+                }
+
+                using (var command = new MySqlCommand(input.Query, conn))
+                {
+                    command.CommandTimeout = options.TimeoutSeconds;
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    foreach (var value in parameterObject)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        command.Parameters.AddWithValue(value.Key, value.GetType()).Value = value.Value;
                     }
 
-                    using (var command = new MySqlCommand(input.Query, conn))
+                    IsolationLevel isolationLevel;
+                    switch (options.TransactionIsolationLevel)
                     {
-                        command.CommandTimeout = options.TimeoutSeconds;
-                        command.CommandType = CommandType.StoredProcedure;
+                        case TransactionIsolationLevel.ReadCommitted:
+                            isolationLevel = IsolationLevel.ReadCommitted;
+                            break;
+                        case TransactionIsolationLevel.ReadUncommitted:
+                            isolationLevel = IsolationLevel.ReadUncommitted;
+                            break;
+                        case TransactionIsolationLevel.RepeatableRead:
+                            isolationLevel = IsolationLevel.RepeatableRead;
+                            break;
+                        case TransactionIsolationLevel.Serializable:
+                            isolationLevel = IsolationLevel.Serializable;
+                            break;
+                        default:
+                            isolationLevel = IsolationLevel.RepeatableRead;
+                            break;
+                    }
 
-                        foreach (var value in parameterObject)
+                    using (var trans = conn.BeginTransaction(isolationLevel))
+                    {
+                        try
                         {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            command.Parameters.AddWithValue(value.Key, value.GetType()).Value = value.Value;
+                            var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
+                            trans.Commit();
+
+                            return new Result(affectedRows);
                         }
-
-                        IsolationLevel isolationLevel;
-                        switch (options.TransactionIsolationLevel)
+                        catch (Exception ex)
                         {
-                            case TransactionIsolationLevel.ReadCommitted:
-                                isolationLevel = IsolationLevel.ReadCommitted;
-                                break;
-                            case TransactionIsolationLevel.ReadUncommitted:
-                                isolationLevel = IsolationLevel.ReadUncommitted;
-                                break;
-                            case TransactionIsolationLevel.RepeatableRead:
-                                isolationLevel = IsolationLevel.RepeatableRead;
-                                break;
-                            case TransactionIsolationLevel.Serializable:
-                                isolationLevel = IsolationLevel.Serializable;
-                                break;
-                            default:
-                                isolationLevel = IsolationLevel.RepeatableRead;
-                                break;
-                        }
+                            trans.Rollback();
+                            trans.Dispose();
 
-                        using (var trans = conn.BeginTransaction(isolationLevel))
-                        {
-                            try
-                            {
-                                var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
-                                trans.Commit();
-
-                                return new Result(affectedRows);
-                            }
-                            catch (Exception ex)
-                            {
-                                trans.Rollback();
-                                trans.Dispose();
-
-                                throw new Exception("Query failed " + ex.Message);
-                            }
+                            throw new Exception("Query failed " + ex.Message);
                         }
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
         }
-
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
+
 }
