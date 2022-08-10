@@ -31,7 +31,6 @@ public class MySQL
     {
         try
         {
-            // Create connection
             using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
             {
                 await conn.OpenAsync(cancellationToken).ConfigureAwait(false);

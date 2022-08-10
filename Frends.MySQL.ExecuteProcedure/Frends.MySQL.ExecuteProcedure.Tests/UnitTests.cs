@@ -9,13 +9,7 @@ namespace Frends.MySQL.ExecuteProcedure.Tests;
 
 public class UnitTests
 {
-    /// <summary>
-    /// THESE TESTS DO NOT WORK UNLESS YOU INSTALL MySql LOCALLY ON YOUR OWN COMPUTER!
-    /// </summary>
     [TestClass]
-#if false
-[Ignore("Cannot be run unless you have a properly configured MySql DB running on your local computer")]
-#endif
     public class MySqlQueryTests
     {
         private readonly string _server = Environment.GetEnvironmentVariable("MySQL_server");
