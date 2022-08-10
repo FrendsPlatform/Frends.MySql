@@ -20,8 +20,6 @@ C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\K4os.Compression.LZ4.Streams.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\K4os.Hash.xxHash.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.VisualStudio.CodeCoverage.Shim.dll
-C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.Crm.Sdk.Proxy.dll
-C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.Xrm.Sdk.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.DotNet.InternalAbstractions.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.TestPlatform.CoreUtilities.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.TestPlatform.PlatformAbstractions.dll
@@ -130,4 +128,3 @@ C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.genruntimeconfig.cache
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\ref\Frends.MySQL.ExecuteProcedure.Tests.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\refint\Frends.MySQL.ExecuteProcedure.Tests.dll
-C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\System.Text.Json.dll

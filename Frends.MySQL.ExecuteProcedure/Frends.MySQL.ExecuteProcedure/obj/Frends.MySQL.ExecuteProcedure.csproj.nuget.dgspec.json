@@ -49,10 +49,6 @@
               "target": "Package",
               "version": "[4.7.0, )"
             },
-            "Microsoft.CrmSdk.CoreAssemblies": {
-              "target": "Package",
-              "version": "[9.0.2.45, )"
-            },
             "MySql.Data": {
               "target": "Package",
               "version": "[8.0.29, )"
