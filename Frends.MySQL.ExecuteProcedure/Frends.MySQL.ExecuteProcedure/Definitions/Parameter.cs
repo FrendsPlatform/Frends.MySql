@@ -11,14 +11,14 @@ public class Parameter
     /// <summary>
     /// The name of the parameter
     /// </summary>
-    [DefaultValue("Parameter name")]
+    [DefaultValue("ParameterName")]
     [DisplayFormat(DataFormatString = "Text")]
     public string Name { get; set; }
 
     /// <summary>
     /// The value of the parameter
     /// </summary>
-    [DefaultValue("Parameter value")]
+    [DefaultValue("ParameterValue")]
     [DisplayFormat(DataFormatString = "Text")]
     public dynamic Value { get; set; }
 }

@@ -22,7 +22,7 @@ public class Input
     /// </summary>
     /// <example>SELECT ColumnName FROM TableName</example>
     [DisplayFormat(DataFormatString = "Sql")]
-    [DefaultValue("SELECT ColumnName FROM TableName")]
+    [DefaultValue("ProcedureName")]
     public string Query { get; set; }
 
     /// <summary>
