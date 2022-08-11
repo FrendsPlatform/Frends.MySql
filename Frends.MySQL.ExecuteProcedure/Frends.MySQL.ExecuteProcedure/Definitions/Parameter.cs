@@ -11,7 +11,7 @@ public class Parameter
     /// <summary>
     /// The name of the parameter
     /// </summary>
-    [DefaultValue("ParameterName")]
+    [DefaultValue("Parameter name")]
     [DisplayFormat(DataFormatString = "Text")]
     public string Name { get; set; }
 
