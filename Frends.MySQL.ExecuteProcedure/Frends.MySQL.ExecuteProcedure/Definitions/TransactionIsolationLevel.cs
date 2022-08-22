@@ -3,7 +3,6 @@
 /// <summary>
 /// Transaction isolation level
 /// </summary>
-/// <example>ReadCommited</example>
 public enum TransactionIsolationLevel
 {
     /// <summary>

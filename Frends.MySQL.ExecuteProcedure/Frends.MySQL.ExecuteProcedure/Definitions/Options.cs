@@ -17,6 +17,7 @@ public class Options
     /// <summary>
     /// Transaction isolation level to use.
     /// </summary>
+    /// <example>ReadCommited</example>
     [DefaultValue(TransactionIsolationLevel.RepeatableRead)]
     public TransactionIsolationLevel TransactionIsolationLevel { get; set; }
 }

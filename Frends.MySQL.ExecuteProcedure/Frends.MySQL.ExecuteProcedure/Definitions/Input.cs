@@ -28,5 +28,6 @@ public class Input
     /// <summary>
     /// Parameters for the database query
     /// </summary>
+    /// <example>Name: ValueName</example>
     public Parameter[] Parameters { get; set; }
 }

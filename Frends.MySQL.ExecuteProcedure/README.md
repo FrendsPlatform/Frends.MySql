@@ -1,5 +1,5 @@
-# Frends.Salesforce.ExecuteQuery
-FRENDS Task for Executing a Procedure in MySQL.
+# Frends.MySQL.ExecuteProcedure
+Frends Task for Executing a Procedure in MySQL.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) 
 [![Build](https://github.com/FrendsPlatform/Frends.MySQL/actions/workflows/ExecuteProcedure_build_and_test_on_main.yml/badge.svg)](https://github.com/FrendsPlatform/Frends.MySQL/actions)

@@ -11,6 +11,7 @@ public class Parameter
     /// <summary>
     /// The name of the parameter
     /// </summary>
+    /// <example>ValueName</example>
     [DefaultValue("ParameterName")]
     [DisplayFormat(DataFormatString = "Text")]
     public string Name { get; set; }
@@ -18,6 +19,7 @@ public class Parameter
     /// <summary>
     /// The value of the parameter
     /// </summary>
+    /// <example>123</example>
     [DefaultValue("ParameterValue")]
     [DisplayFormat(DataFormatString = "Text")]
     public dynamic Value { get; set; }
