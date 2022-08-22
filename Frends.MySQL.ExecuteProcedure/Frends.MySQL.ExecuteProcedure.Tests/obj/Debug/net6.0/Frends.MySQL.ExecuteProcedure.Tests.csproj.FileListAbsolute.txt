@@ -1,5 +1,7 @@
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\CoverletSourceRootsMapping
+C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\FrendsTaskMetadata.json
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\testhost.exe
+C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\testhost.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\NUnit3.TestAdapter.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\NUnit3.TestAdapter.pdb
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\nunit.engine.dll
@@ -8,8 +10,6 @@ C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
-C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\FrendsTaskMetadata.json
-C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\testhost.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.deps.json
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.runtimeconfig.json
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\bin\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.dll
@@ -124,7 +124,7 @@ C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.csproj.CoreCompileInputs.cache
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.csproj.CopyComplete
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.dll
+C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\refint\Frends.MySQL.ExecuteProcedure.Tests.dll
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.pdb
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\Frends.MySQL.ExecuteProcedure.Tests.genruntimeconfig.cache
 C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\ref\Frends.MySQL.ExecuteProcedure.Tests.dll
-C:\Users\ahlstve\source\repos\Frends.MySQL\Frends.MySQL.ExecuteProcedure\Frends.MySQL.ExecuteProcedure.Tests\obj\Debug\net6.0\refint\Frends.MySQL.ExecuteProcedure.Tests.dll

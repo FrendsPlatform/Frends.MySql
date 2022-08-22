@@ -34,7 +34,6 @@ public class MySQL
             using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
             {
                 await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
-                cancellationToken.ThrowIfCancellationRequested();
 
                 IDictionary<string, object> parameterObject = new ExpandoObject();
                 if (input.Parameters != null)
