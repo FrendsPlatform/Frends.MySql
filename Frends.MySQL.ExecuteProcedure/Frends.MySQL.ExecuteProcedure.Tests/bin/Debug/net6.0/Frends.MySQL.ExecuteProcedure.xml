@@ -25,6 +25,7 @@
             <summary>
             Parameters for the database query
             </summary>
+            <example>Name: ValueName</example>
         </member>
         <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.Options">
             <summary>
@@ -41,6 +42,7 @@
             <summary>
             Transaction isolation level to use.
             </summary>
+            <example>ReadCommited</example>
         </member>
         <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.Parameter">
             <summary>
@@ -51,11 +53,13 @@
             <summary>
             The name of the parameter
             </summary>
+            <example>ValueName</example>
         </member>
         <member name="P:Frends.MySQL.ExecuteProcedure.Definitions.Parameter.Value">
             <summary>
             The value of the parameter
             </summary>
+            <example>123</example>
         </member>
         <member name="T:Frends.MySQL.ExecuteProcedure.Definitions.Result">
             <summary>
@@ -72,7 +76,6 @@
             <summary>
             Transaction isolation level
             </summary>
-            <example>ReadCommited</example>
         </member>
         <member name="F:Frends.MySQL.ExecuteProcedure.Definitions.TransactionIsolationLevel.ReadCommitted">
             <summary>

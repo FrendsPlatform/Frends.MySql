@@ -157,5 +157,34 @@ public class UnitTests
             _options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
             await MySQL.ExecuteProcedure(input, _options, new CancellationToken());
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task TestThrowCallStoredProcedure_EmptyConnectionString()
+        {
+            var input = new Input
+            {
+                ConnectionString = "",
+                Query = @"UpdateHodorTest"
+            };
+
+            _options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
+            await MySQL.ExecuteProcedure(input, _options, new CancellationToken());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task TestThrowCallStoredProcedure_EmptyQuery()
+        {
+            var input = new Input
+            {
+                ConnectionString = "server=invalid;uid=invalid;pwd=invalid;database=invalid;",
+                Query = @""
+            };
+
+            _options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
+            await MySQL.ExecuteProcedure(input, _options, new CancellationToken());
+        }
+
     }
 }

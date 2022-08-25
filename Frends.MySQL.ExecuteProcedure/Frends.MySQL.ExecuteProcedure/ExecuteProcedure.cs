@@ -29,6 +29,9 @@ public class MySQL
         CancellationToken cancellationToken
     )
     {
+        if(string.IsNullOrWhiteSpace(input.ConnectionString)) throw new ArgumentNullException("Connection string cannot be empty.");
+        if (string.IsNullOrWhiteSpace(input.Query)) throw new ArgumentNullException("Query cannot be empty.");
+
         try
         {
             using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
