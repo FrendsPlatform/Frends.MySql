@@ -1,0 +1,12 @@
+name: ExecuteQuery release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: FrendsPlatform/FrendsTasks/.github/workflows/build_main.yml@main
+    with:
+      workdir: Frends.MySQL.ExecuteQuery
+    secrets:
+      feed_api_key: ${{ secrets.TASKS_FEED_API_KEY }}
