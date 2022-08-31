@@ -19,7 +19,7 @@ public class UnitTests
     public async Task OneTimeTearDown()
     {
         using var connection = new MySqlConnection(await CreateConnectionString());
-        await connection.OpenAsync();
+        await connection.OpenAsync(); 
 
         using var command = new MySqlCommand("drop table FooTest", connection);
         await command.ExecuteNonQueryAsync();
