@@ -34,17 +34,11 @@ public class UnitTests
             CommandText = @"select * from FooTest limit 2"
         };
 
+        var y = "{";
+        var z = "}";
+        var r = "\r\n";
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(@"[
-  {
-    ""name"": ""foo"",
-    ""value"": 123
-  },
-  {
-    ""name"": ""bar"",
-    ""value"": 321
-  }
-]"));
+        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(@$"[{r}  {y}{r}    ""name"": ""foo"",{r}    ""value"": 123{r}  {z},{r}  {y}{r}    ""name"": ""bar"",{r}    ""value"": 321{r}  {z}{r}]"));
     }
 
     [Test, Order(3)]
