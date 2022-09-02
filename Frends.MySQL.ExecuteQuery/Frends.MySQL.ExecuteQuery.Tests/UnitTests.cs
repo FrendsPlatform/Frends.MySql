@@ -85,7 +85,7 @@ public class UnitTests
         var expect = $"[{newline}  {{{newline}    \"value\": 123{newline}  }}{newline}]";
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect));
+        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect.Replace(@"\n\r", @"\n")));
     }
 
     [Test, Order(6)]
