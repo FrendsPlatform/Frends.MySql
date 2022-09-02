@@ -33,12 +33,20 @@ public class UnitTests
             ConnectionString = await CreateConnectionString(),
             CommandText = @"select * from FooTest limit 2"
         };
-
-        var y = "{";
-        var z = "}";
-        var r = "\r\n";
+        
+        var expect = @"[
+  {
+    ""name"": ""foo"",
+    ""value"": 123
+  },
+  {
+    ""name"": ""bar"",
+    ""value"": 321
+  }
+]";
+        
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(@$"[{r}  {y}{r}    ""name"": ""foo"",{r}    ""value"": 123{r}  {z},{r}  {y}{r}    ""name"": ""bar"",{r}    ""value"": 321{r}  {z}{r}]"));
+        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect.Replace(@"\n\r", @"\n")));
     }
 
     [Test, Order(3)]
