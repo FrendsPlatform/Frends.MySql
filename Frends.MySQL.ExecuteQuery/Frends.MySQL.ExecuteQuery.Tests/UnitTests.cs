@@ -81,12 +81,11 @@ public class UnitTests
             CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 "
         };
 
+        var newline = Environment.NewLine;
+        var expect = $"[{newline}  {{{newline}    \"value\": 123{newline}  }}{newline}]";
+
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(@"[
-  {
-    ""value"": 123
-  }
-]"));
+        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect));
     }
 
     [Test, Order(6)]
