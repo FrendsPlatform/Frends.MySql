@@ -1,5 +1,5 @@
 # Frends.MySql
-Frends Task for connecting to MySql database.
+Frends Tasks for MySQL database related operations.
 
 # Tasks
 
