@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    uses: FrendsPlatform/FrendsTasks/.github/workflows/build_main.yml@main
+    uses: FrendsPlatform/FrendsTasks/.github/workflows/release.yml@main
     with:
       workdir: Frends.MySQL.ExecuteQuery
     secrets:
