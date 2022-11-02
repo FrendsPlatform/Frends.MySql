@@ -4,6 +4,7 @@ Frends Tasks for MySQL database related operations.
 # Tasks
 
 - [Frends.MySQL.ExecuteQuery](Frends.MySQL.ExecuteQuery/README.md)
+- [Frends.MySQL.ExecuteProcedure](Frends.MySQL.ExecuteProcedure/README.md)
 
 # Contributing
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
