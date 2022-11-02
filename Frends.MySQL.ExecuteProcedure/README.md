@@ -10,7 +10,7 @@ Returns the count of affected rows.
 
 ## Installing
 
-You can install the Task via frends UI Task View or you can find the NuGet package from the following NuGet feed
+You can install the Task via Frends UI Task View or you can find the NuGet package from the following NuGet feed
 https://www.myget.org/F/frends-tasks/api/v2.
 
 ## Building
@@ -21,6 +21,7 @@ Rebuild the project
 
 Run tests
 
+Setup MySQL to docker: `docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql`
 `dotnet test`
 
 Create a NuGet package
