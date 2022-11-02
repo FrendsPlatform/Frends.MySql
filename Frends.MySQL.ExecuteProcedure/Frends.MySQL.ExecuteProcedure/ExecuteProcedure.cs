@@ -29,8 +29,8 @@ public class MySQL
         CancellationToken cancellationToken
     )
     {
-        if(string.IsNullOrWhiteSpace(input.ConnectionString)) throw new ArgumentNullException("Connection string cannot be empty.");
-        if (string.IsNullOrWhiteSpace(input.Query)) throw new ArgumentNullException("Query cannot be empty.");
+        if(string.IsNullOrWhiteSpace(input.ConnectionString)) throw new ArgumentNullException("Connection string cannot be empty.", nameof(input.ConnectionString));
+        if (string.IsNullOrWhiteSpace(input.Query)) throw new ArgumentNullException("Query cannot be empty.", nameof(input.Query));
 
         try
         {
@@ -43,7 +43,6 @@ public class MySQL
                 {
                     foreach (var parameter in input.Parameters)
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
                         parameterObject.Add(parameter.Name, parameter.Value);
                     }
                 }
@@ -55,7 +54,6 @@ public class MySQL
 
                     foreach (var value in parameterObject)
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
                         command.Parameters.AddWithValue(value.Key, value.GetType()).Value = value.Value;
                     }
 
