@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Dynamic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,23 +40,14 @@ public class MySQL
                 await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
 
                 IDictionary<string, object> parameterObject = new ExpandoObject();
-                if (input.Parameters != null)
-                {
-                    foreach (var parameter in input.Parameters)
-                    {
-                        parameterObject.Add(parameter.Name, parameter.Value);
-                    }
-                }
+                if (input.Parameters != null) input.Parameters.Select(parameter => parameterObject.Add(parameter.Name, parameter.Value));
 
                 using (var command = new MySqlCommand(input.Query, conn))
                 {
                     command.CommandTimeout = options.TimeoutSeconds;
                     command.CommandType = CommandType.StoredProcedure;
 
-                    foreach (var value in parameterObject)
-                    {
-                        command.Parameters.AddWithValue(value.Key, value.GetType()).Value = value.Value;
-                    }
+                    parameterObject.Select(value => command.Parameters.AddWithValue(value.Key, value.GetType()).Value = value.Value);
 
                     IsolationLevel isolationLevel;
                     switch (options.TransactionIsolationLevel)
