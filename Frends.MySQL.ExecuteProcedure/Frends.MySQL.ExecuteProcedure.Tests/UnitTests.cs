@@ -12,17 +12,17 @@ public class UnitTests
     [TestClass]
     public class MySqlQueryTests
     {
-        private readonly string _server = Environment.GetEnvironmentVariable("MySQL_server");
-        private readonly string _uid = Environment.GetEnvironmentVariable("MySQL_uid");
-        private readonly string _pwd = Environment.GetEnvironmentVariable("MySQL_pwd");
-        private readonly string _database = Environment.GetEnvironmentVariable("MySQL_database");
+        /// <summary>
+        /// Setup MySQL to docker:
+        /// docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql
+        /// </summary>
+
         private Options _options;
-        private string _connectionString;
+        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=my-secret-pw;";
 
         [TestInitialize]
         public async Task OneTimeSetUp()
         {
-            _connectionString = "server=" + _server + ";uid=" + _uid + ";pwd=" + _pwd + ";database=" + _database + ";";
             _options = new Options
             {
                 TimeoutSeconds = 300
@@ -31,6 +31,14 @@ public class UnitTests
             using (var connection = new MySqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
+                using (var command = new MySqlCommand("CREATE DATABASE IF NOT EXISTS MySQLProcedureTest;", connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+                using (var command = new MySqlCommand("USE MySQLProcedureTest;", connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
                 using (var command = new MySqlCommand("CREATE TABLE IF NOT EXISTS DecimalTest(DecimalValue decimal(38,30))", connection))
                 {
                     await command.ExecuteNonQueryAsync();
@@ -65,6 +73,14 @@ public class UnitTests
             {
                 await connection.OpenAsync();
 
+                using (var command = new MySqlCommand("DROP PROCEDURE UpdateHodorTest;", connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+                using (var command = new MySqlCommand("DROP PROCEDURE InsertHodorTest;", connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
                 using (var command = new MySqlCommand("DROP TABLE HodorTest", connection))
                 {
                     await command.ExecuteNonQueryAsync();
@@ -73,11 +89,7 @@ public class UnitTests
                 {
                     await command.ExecuteNonQueryAsync();
                 }
-                using (var command = new MySqlCommand("DROP PROCEDURE UpdateHodorTest;", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-                using (var command = new MySqlCommand("DROP PROCEDURE InsertHodorTest;", connection))
+                using (var command = new MySqlCommand("DROP DATABASE MySQLProcedureTest;", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
