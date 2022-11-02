@@ -13,7 +13,6 @@ public class Input
     /// </summary>
     /// <example>server=server;user=user;database=db;password=pw;</example>
     [PasswordPropertyText]
-    [DisplayFormat(DataFormatString = "Text")]
     [DefaultValue("server=server;user=user;database=db;password=pw;")]
     public string ConnectionString { get; set; }
 
