@@ -1,7 +1,9 @@
 using Frends.MySQL.ExecuteQuery.Definitions;
 using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Extensions;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+
 namespace Frends.MySQL.ExecuteQuery.Tests;
 
 /// <summary>
@@ -19,7 +21,10 @@ public class UnitTests
     public async Task OneTimeTearDown()
     {
         using var connection = new MySqlConnection(await CreateConnectionString());
-        await connection.OpenAsync(); 
+        await connection.OpenAsync();
+
+        using var database = new MySqlCommand("use Unittest", connection);
+        await database.ExecuteNonQueryAsync();
 
         using var command = new MySqlCommand("drop table FooTest", connection);
         await command.ExecuteNonQueryAsync();
@@ -36,9 +41,8 @@ public class UnitTests
 
         var newline = Environment.NewLine;
         var expect = $"[{newline}  {{{newline}    \"name\": \"foo\",{newline}    \"value\": 123{newline}  }},{newline}  {{{newline}    \"name\": \"bar\",{newline}    \"value\": 321{newline}  }}{newline}]";
-
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect.Replace(@"\n\r", @"\n")));
+        Assert.AreEqual(result.ResultJtoken.ToString(), expect.Replace(@"\n\r", @"\n"));
     }
 
     [Test, Order(3)]
@@ -50,8 +54,8 @@ public class UnitTests
             CommandText = @"select * from tablex limit 2"
         };
 
-        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.Success.Equals(false) && result.Message.Contains("Error while commiting query select * from tablex limit 2: "));
+        Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken()));
+        Assert.IsTrue(ex.Message.ToString().Contains("Table 'unittest.tablex' doesn't exist"));
     }
 
     [Test, Order(4)]
@@ -65,11 +69,11 @@ public class UnitTests
         {
             ConnectionString = await CreateConnectionString(),
             CommandText = "insert into FooTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );"
-
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo("1"));
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(result.ResultJtoken, new JArray());
     }
 
     [Test, Order(5)]
@@ -80,12 +84,11 @@ public class UnitTests
             ConnectionString = await CreateConnectionString(),
             CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 "
         };
-
-        var newline = Environment.NewLine;
-        var expect = $"[{newline}  {{{newline}    \"value\": 123{newline}  }}{newline}]";
+        var expect = new JObject(new JProperty("value", 123));
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect.Replace(@"\n\r", @"\n")));
+        Console.WriteLine(expect["value"]);
+        Assert.AreEqual(result.ResultJtoken[0]["value"], expect["value"]);
     }
 
     [Test, Order(6)]
@@ -118,9 +121,10 @@ public class UnitTests
         MySqlConnectionStringBuilder conn_string = new()
         {
             Server = "127.0.0.1",
-            Port = 3306,
+            Port = 3360,
             UserID = "root",
-            Password = "my-secret-pw"
+            Password = "my-secret-password",
+            Database = "unittest"
         };
 
         await HandleDB(conn_string.ToString());
