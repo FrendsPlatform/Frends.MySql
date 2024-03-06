@@ -87,7 +87,6 @@ public class UnitTests
         var expect = new JObject(new JProperty("value", 123));
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Console.WriteLine(expect["value"]);
         Assert.AreEqual(result.ResultJtoken[0]["value"], expect["value"]);
     }
 
