@@ -37,7 +37,7 @@ public class MySQL
             command.CommandText = query.CommandText;
             if (query.Parameters != null)
             {
-                var parameters = command.CreateParameter();
+                command.CreateParameter();
                 foreach (var parameter in query.Parameters)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -61,7 +61,7 @@ public class MySQL
                 command.Transaction = transaction;
 
                 DataTable data = new();
-                MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+                MySqlDataAdapter adapter = new (command);
                 adapter.Fill(data);
 
                 return new Result(true, JToken.FromObject(data));
