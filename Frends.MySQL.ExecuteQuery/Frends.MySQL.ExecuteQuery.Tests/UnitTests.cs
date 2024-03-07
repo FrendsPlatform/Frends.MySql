@@ -102,24 +102,26 @@ public class UnitTests
     }
 
     [Test, Order(6)]
-    public void ShouldThrowException_FaultyConnectionString()
+    public async Task ShouldThrowException_FaultyConnectionString()
     {
         var q = new QueryInput
         {
-            ConnectionString = CreateConnectionString() + "nonsense",
+            ConnectionString = await CreateConnectionString() + "nonsense",
             CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 "
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken()));
-        Assert.That(ex != null && ex.Message.StartsWith("Format of the initialization string"));
+        Console.WriteLine(ex.Message);
+        Assert.IsTrue(ex != null);
+        Assert.AreEqual("Unknown database 'unittestnonsense'", ex.Message);
     }
 
     [Test, Order(7)]
-    public void ShouldThrowException_CancellationRequested()
+    public async Task ShouldThrowException_CancellationRequested()
     {
         var q = new QueryInput
         {
-            ConnectionString = CreateConnectionString() + "nonsense",
+            ConnectionString = await CreateConnectionString() + "nonsense",
             CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 "
         };
 
