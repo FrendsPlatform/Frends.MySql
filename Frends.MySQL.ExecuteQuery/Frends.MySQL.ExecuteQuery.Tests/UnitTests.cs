@@ -111,7 +111,6 @@ public class UnitTests
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken()));
-        Console.WriteLine(ex.Message);
         Assert.IsTrue(ex != null);
         Assert.AreEqual("Unknown database 'unittestnonsense'", ex.Message);
     }
@@ -126,6 +125,7 @@ public class UnitTests
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken(true)));
+        Assert.IsTrue(ex != null);
     }
 
     [Test, Order(8)]
