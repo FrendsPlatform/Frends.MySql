@@ -216,7 +216,7 @@ public class UnitTests
         MySqlConnectionStringBuilder conn_string = new()
         {
             Server = "127.0.0.1",
-            Port = 3360,
+            Port = 3306,
             UserID = "root",
             Password = "my-secret-pw",
             Database = "unittest"
