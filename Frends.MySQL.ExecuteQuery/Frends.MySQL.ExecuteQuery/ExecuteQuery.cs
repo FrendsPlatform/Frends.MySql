@@ -57,7 +57,7 @@ public class MySQL
                     _ => IsolationLevel.RepeatableRead,
                 };
 
-                using var transaction = await conn.BeginTransactionAsync(cancellationToken);
+                using var transaction = await conn.BeginTransactionAsync(isolationLevel, cancellationToken);
                 command.Transaction = transaction;
 
                 using DataTable data = new();
