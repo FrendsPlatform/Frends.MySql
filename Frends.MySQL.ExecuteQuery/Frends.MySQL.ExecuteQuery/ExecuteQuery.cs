@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,45 +25,14 @@ public class MySQL
     /// <returns>Object { bool Success, JToken ResultJtoken }</returns>
     public static async Task<Result> ExecuteQuery([PropertyTab] QueryInput query, [PropertyTab] Options options, CancellationToken cancellationToken)
     {
-        var scalarReturnQueries = new[] { "update ", "insert ", "drop ", "truncate ", "create ", "alter " };
-
         try
         {
             using var conn = new MySqlConnection(query.ConnectionString);
             await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
 
-            var isolationLevel = options.MySqlTransactionIsolationLevel switch
-            {
-                MySqlTransactionIsolationLevel.ReadCommitted => IsolationLevel.ReadCommitted,
-                MySqlTransactionIsolationLevel.ReadUncommitted => IsolationLevel.ReadUncommitted,
-                MySqlTransactionIsolationLevel.RepeatableRead => IsolationLevel.RepeatableRead,
-                MySqlTransactionIsolationLevel.Serializable => IsolationLevel.Serializable,
-                _ => IsolationLevel.RepeatableRead,
-            };
-
-            /*if (scalarReturnQueries.Any(query.CommandText.TrimStart().ToLower().Contains))
-            {
-                // scalar return
-                using var trans = conn.BeginTransaction(isolationLevel);
-                try
-                {
-                    var affectedRows = await conn.ExecuteAsync(query.CommandText, parameterObject, trans, command.CommandTimeout, command.CommandType);
-                    trans.Commit();
-                    return new Result(true, "Success", JToken.FromObject(affectedRows));
-                }
-                catch (Exception ex)
-                {
-                    trans.Rollback();
-                    trans.Dispose();
-                    return new Result(false, $"Error while commiting query {query.CommandText}: {ex}", null);
-                }
-            }*/
-
-            using var transaction = await conn.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
             using var command = new MySqlCommand();
             command.Connection = conn;
-            command.Transaction = transaction;
             command.CommandType = command.CommandType;
             command.CommandText = query.CommandText;
             if (query.Parameters != null)
@@ -76,11 +46,31 @@ public class MySQL
             }
             command.CommandTimeout = command.CommandTimeout;
 
-            DataTable data = new ();
-            MySqlDataAdapter adapter = new MySqlDataAdapter(command);
-            adapter.Fill(data);
+            if (query.CommandText.ToString().ToLower().Contains("select"))
+            {
+                var isolationLevel = options.MySqlTransactionIsolationLevel switch
+                {
+                    MySqlTransactionIsolationLevel.ReadCommitted => IsolationLevel.ReadCommitted,
+                    MySqlTransactionIsolationLevel.ReadUncommitted => IsolationLevel.ReadUncommitted,
+                    MySqlTransactionIsolationLevel.RepeatableRead => IsolationLevel.RepeatableRead,
+                    MySqlTransactionIsolationLevel.Serializable => IsolationLevel.Serializable,
+                    _ => IsolationLevel.RepeatableRead,
+                };
 
-            return new Result(true, JToken.FromObject(data));
+                using var transaction = await conn.BeginTransactionAsync(cancellationToken);
+                command.Transaction = transaction;
+
+                DataTable data = new();
+                MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+                adapter.Fill(data);
+
+                return new Result(true, JToken.FromObject(data));
+            }
+            else
+            {
+                var result = await command.ExecuteNonQueryAsync(cancellationToken);
+                return new Result(true, JToken.FromObject(result));
+            }
         }
         catch (Exception ex)
         {
