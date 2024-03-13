@@ -1,7 +1,9 @@
 using Frends.MySQL.ExecuteQuery.Definitions;
 using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Extensions;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+
 namespace Frends.MySQL.ExecuteQuery.Tests;
 
 /// <summary>
@@ -13,13 +15,15 @@ public class UnitTests
 {
     readonly Options _options = new() { TimeoutSeconds = 300, MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.RepeatableRead };
 
-    //[OneTimeTearDown]
     [Test, Order(50)]
 
     public async Task OneTimeTearDown()
     {
         using var connection = new MySqlConnection(await CreateConnectionString());
-        await connection.OpenAsync(); 
+        await connection.OpenAsync();
+
+        using var database = new MySqlCommand("use unittest", connection);
+        await database.ExecuteNonQueryAsync();
 
         using var command = new MySqlCommand("drop table FooTest", connection);
         await command.ExecuteNonQueryAsync();
@@ -36,9 +40,8 @@ public class UnitTests
 
         var newline = Environment.NewLine;
         var expect = $"[{newline}  {{{newline}    \"name\": \"foo\",{newline}    \"value\": 123{newline}  }},{newline}  {{{newline}    \"name\": \"bar\",{newline}    \"value\": 321{newline}  }}{newline}]";
-
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect.Replace(@"\n\r", @"\n")));
+        Assert.AreEqual(expect.Replace(@"\n\r", @"\n"), result.ResultJtoken.ToString());
     }
 
     [Test, Order(3)]
@@ -50,8 +53,8 @@ public class UnitTests
             CommandText = @"select * from tablex limit 2"
         };
 
-        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.Success.Equals(false) && result.Message.Contains("Error while commiting query select * from tablex limit 2: "));
+        Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken()));
+        Assert.IsTrue(ex.Message.ToString().Contains("Table 'unittest.tablex' doesn't exist"));
     }
 
     [Test, Order(4)]
@@ -61,15 +64,27 @@ public class UnitTests
         string rndName = Path.GetRandomFileName();
         Random rnd = new();
         int rndValue = rnd.Next(1000);
+
+        var connectionstring = await CreateConnectionString();
         var q = new QueryInput
         {
-            ConnectionString = await CreateConnectionString(),
+            ConnectionString = connectionstring,
             CommandText = "insert into FooTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );"
-
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo("1"));
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(new JArray(), result.ResultJtoken);
+
+        var cq = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "select * from FooTest;",
+        };
+
+        var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
+        Assert.IsTrue(check.Success);
+        Assert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
     }
 
     [Test, Order(5)]
@@ -80,37 +95,153 @@ public class UnitTests
             ConnectionString = await CreateConnectionString(),
             CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 "
         };
-
-        var newline = Environment.NewLine;
-        var expect = $"[{newline}  {{{newline}    \"value\": 123{newline}  }}{newline}]";
+        var expect = new JObject(new JProperty("value", 123));
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.That(result.ResultJtoken.ToString(), Is.EqualTo(expect.Replace(@"\n\r", @"\n")));
+        Assert.AreEqual(expect["value"], result.ResultJtoken[0]["value"]);
     }
 
     [Test, Order(6)]
-    public void ShouldThrowException_FaultyConnectionString()
+    public async Task ShouldThrowException_FaultyConnectionString()
     {
         var q = new QueryInput
         {
-            ConnectionString = CreateConnectionString() + "nonsense",
+            ConnectionString = await CreateConnectionString() + "nonsense",
             CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 "
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken()));
-        Assert.That(ex != null && ex.Message.StartsWith("Format of the initialization string"));
+        Assert.IsNotNull(ex);
+        Assert.AreEqual("Unknown database 'unittestnonsense'", ex.Message);
     }
 
     [Test, Order(7)]
-    public void ShouldThrowException_CancellationRequested()
+    public async Task ShouldThrowException_CancellationRequested()
     {
         var q = new QueryInput
         {
-            ConnectionString = CreateConnectionString() + "nonsense",
+            ConnectionString = await CreateConnectionString() + "nonsense",
             CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 "
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken(true)));
+        Assert.IsNotNull(ex);
+    }
+
+    [Test, Order(8)]
+    public async Task ShouldSuccess_DoBasicScalar()
+    {
+        var q = new QueryInput
+        {
+            ConnectionString = await CreateConnectionString(),
+            CommandText = "SELECT UPPER(name) FROM FooTest"
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        Assert.AreEqual("FOO", result.ResultJtoken[0]["UPPER(name)"].ToString());
+    }
+
+    [Test, Order(9)]
+    public async Task ShouldSuccess_DoBasicDelete()
+    {
+        var connectionstring = await CreateConnectionString();
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "delete from FooTest where value = 123"
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        Assert.IsTrue(result.Success);
+
+        var cq = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "select * from FooTest;",
+        };
+
+        var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
+        Assert.IsTrue(check.Success);
+        Assert.IsFalse(check.ResultJtoken.ToString().Contains("123"));
+    }
+
+    [Test, Order(10)]
+    public async Task ShouldSuccess_DoBasicUpdate()
+    {
+        var connectionstring = await CreateConnectionString();
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "update FooTest set name = 'newName' where value = 123"
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        Assert.IsTrue(result.Success);
+
+        var cq = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "select * from FooTest;",
+        };
+
+        var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
+        Assert.IsTrue(check.Success);
+        Assert.IsTrue(check.ResultJtoken.ToString().Contains("newName"));
+    }
+
+    [Test, Order(10)]
+    public async Task ShouldSuccess_DoTruncate()
+    {
+        var connectionstring = await CreateConnectionString();
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "truncate FooTest"
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        Assert.IsTrue(result.Success);
+
+        var cq = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "select * from FooTest;",
+        };
+
+        var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
+        Assert.IsTrue(check.Success);
+        Assert.AreEqual(new JArray(), result.ResultJtoken);
+    }
+
+    [Test, Order(11)]
+
+    public async Task ShouldSuccess_InsertValuesWithParameters()
+    {
+        string rndName = Path.GetRandomFileName();
+        Random rnd = new();
+        int rndValue = rnd.Next(1000);
+
+        var connectionstring = await CreateConnectionString();
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "insert into FooTest (name, value) values (@rndName , @rndValue);",
+            Parameters = new Parameter[] { new() { Name = "@rndName", Value = rndName.AddDoubleQuote() }, new() { Name = "@rndValue", Value = rndValue } }
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(new JArray(), result.ResultJtoken);
+
+        var cq = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "select * from FooTest;",
+        };
+
+        var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
+        Assert.IsTrue(check.Success);
+        Assert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
     }
 
     private static async Task<string> CreateConnectionString()
@@ -120,10 +251,12 @@ public class UnitTests
             Server = "127.0.0.1",
             Port = 3306,
             UserID = "root",
-            Password = "my-secret-pw"
+            Password = "my-secret-pw",
         };
 
         await HandleDB(conn_string.ToString());
+
+        conn_string.Database = "unittest";
         return conn_string.ToString();
     }
 

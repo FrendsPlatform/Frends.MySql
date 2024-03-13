@@ -14,21 +14,14 @@ public class Result
     public bool Success { get; private set; }
 
     /// <summary>
-    /// Result message.
-    /// </summary>
-    /// <example>Success</example>
-    public string Message { get; private set; }
-
-    /// <summary>
     /// Result value(s).
     /// </summary>
     /// <example>[{"name": "foo", "value": 123}]</example>
     public dynamic ResultJtoken { get; private set; }
 
-    internal Result(bool success, string message, JToken resultJtoken)
+    internal Result(bool success, JToken resultJtoken)
     {
         Success = success;
-        Message = message;
         ResultJtoken = resultJtoken;
     }
 }

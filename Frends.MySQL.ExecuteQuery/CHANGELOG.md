@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.0] - 2024-03-07
+### Updated
+- Changed MySqlData -library to MySqlConnector -library.
+
 ## [1.0.1] - 2023-01-02
 ### Fixed
 - Fixed issue with Task's result couldn't be referenced with dot notation by changing the ResultJtoken to dynamic.
