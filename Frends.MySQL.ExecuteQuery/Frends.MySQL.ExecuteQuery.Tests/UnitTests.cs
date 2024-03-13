@@ -22,7 +22,7 @@ public class UnitTests
         using var connection = new MySqlConnection(await CreateConnectionString());
         await connection.OpenAsync();
 
-        using var database = new MySqlCommand("use Unittest", connection);
+        using var database = new MySqlCommand("use unittest", connection);
         await database.ExecuteNonQueryAsync();
 
         using var command = new MySqlCommand("drop table FooTest", connection);

@@ -60,7 +60,7 @@ public class MySQL
                 command.Transaction = transaction;
 
                 using DataTable data = new();
-                using MySqlDataAdapter adapter = new (command);
+                using MySqlDataAdapter adapter = new(command);
                 adapter.Fill(data);
 
                 return new Result(true, JToken.FromObject(data));
