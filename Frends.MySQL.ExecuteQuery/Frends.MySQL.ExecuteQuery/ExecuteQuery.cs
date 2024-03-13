@@ -40,7 +40,7 @@ public class MySQL
                 foreach (var parameter in query.Parameters)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    command.Parameters.Add(parameter.Name, parameter.Value);
+                    command.Parameters.Add(new MySqlParameter(parameter.Name, parameter.Value));
                 }
             }
             command.CommandTimeout = command.CommandTimeout;

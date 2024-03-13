@@ -213,6 +213,37 @@ public class UnitTests
         Assert.AreEqual(new JArray(), result.ResultJtoken);
     }
 
+    [Test, Order(11)]
+
+    public async Task ShouldSuccess_InsertValuesWithParameters()
+    {
+        string rndName = Path.GetRandomFileName();
+        Random rnd = new();
+        int rndValue = rnd.Next(1000);
+
+        var connectionstring = await CreateConnectionString();
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "insert into FooTest (name, value) values (@rndName , @rndValue);",
+            Parameters = new Parameter[] { new() { Name = "@rndName", Value = rndName.AddDoubleQuote() }, new() { Name = "@rndValue", Value = rndValue } }
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(new JArray(), result.ResultJtoken);
+
+        var cq = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "select * from FooTest;",
+        };
+
+        var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
+        Assert.IsTrue(check.Success);
+        Assert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
+    }
+
     private static async Task<string> CreateConnectionString()
     {
         MySqlConnectionStringBuilder conn_string = new()
