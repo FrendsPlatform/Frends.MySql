@@ -221,10 +221,11 @@ public class UnitTests
             Port = 3306,
             UserID = "root",
             Password = "my-secret-pw",
-            Database = "unittest"
         };
 
         await HandleDB(conn_string.ToString());
+
+        conn_string.Database = "unittest";
         return conn_string.ToString();
     }
 
