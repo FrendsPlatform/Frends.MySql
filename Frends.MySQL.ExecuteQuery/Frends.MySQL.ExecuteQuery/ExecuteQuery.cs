@@ -75,5 +75,5 @@ public class MySQL
         {
             throw new Exception(ex.Message);
         }
-    } 
+    }
 }
