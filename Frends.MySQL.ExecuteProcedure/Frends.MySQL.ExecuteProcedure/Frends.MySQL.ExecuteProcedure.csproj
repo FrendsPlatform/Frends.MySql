@@ -24,7 +24,7 @@
   <ItemGroup>
 	<PackageReference Include="MySql.Data" Version="8.0.29" />
 	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-	<PackageReference Include="RestSharp" Version="107.3.0" />
+	<PackageReference Include="RestSharp" Version="112.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
   </ItemGroup>
