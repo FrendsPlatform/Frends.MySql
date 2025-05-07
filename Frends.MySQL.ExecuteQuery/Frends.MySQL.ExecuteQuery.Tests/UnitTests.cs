@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Extensions;
 using MySqlConnector;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace Frends.MySQL.ExecuteQuery.Tests;
 
@@ -41,7 +42,7 @@ public class UnitTests
         var newline = Environment.NewLine;
         var expect = $"[{newline}  {{{newline}    \"name\": \"foo\",{newline}    \"value\": 123{newline}  }},{newline}  {{{newline}    \"name\": \"bar\",{newline}    \"value\": 321{newline}  }}{newline}]";
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.AreEqual(expect.Replace(@"\n\r", @"\n"), result.ResultJtoken.ToString());
+        ClassicAssert.AreEqual(expect.Replace(@"\n\r", @"\n"), result.ResultJtoken.ToString());
     }
 
     [Test, Order(3)]
@@ -54,7 +55,7 @@ public class UnitTests
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken()));
-        Assert.IsTrue(ex.Message.ToString().Contains("Table 'unittest.tablex' doesn't exist"));
+        ClassicAssert.IsTrue(ex.Message.ToString().Contains("Table 'unittest.tablex' doesn't exist"));
     }
 
     [Test, Order(4)]
@@ -73,8 +74,8 @@ public class UnitTests
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.IsTrue(result.Success);
-        Assert.AreEqual(new JArray(), result.ResultJtoken);
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.AreEqual(new JArray(), result.ResultJtoken);
 
         var cq = new QueryInput
         {
@@ -83,8 +84,8 @@ public class UnitTests
         };
 
         var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
-        Assert.IsTrue(check.Success);
-        Assert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
+        ClassicAssert.IsTrue(check.Success);
+        ClassicAssert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
     }
 
     [Test, Order(5)]
@@ -98,7 +99,7 @@ public class UnitTests
         var expect = new JObject(new JProperty("value", 123));
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.AreEqual(expect["value"], result.ResultJtoken[0]["value"]);
+        ClassicAssert.AreEqual(expect["value"], result.ResultJtoken[0]["value"]);
     }
 
     [Test, Order(6)]
@@ -111,8 +112,8 @@ public class UnitTests
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken()));
-        Assert.IsNotNull(ex);
-        Assert.AreEqual("Unknown database 'unittestnonsense'", ex.Message);
+        ClassicAssert.IsNotNull(ex);
+        ClassicAssert.AreEqual("Unknown database 'unittestnonsense'", ex.Message);
     }
 
     [Test, Order(7)]
@@ -125,7 +126,7 @@ public class UnitTests
         };
 
         Exception ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(q, _options, new CancellationToken(true)));
-        Assert.IsNotNull(ex);
+        ClassicAssert.IsNotNull(ex);
     }
 
     [Test, Order(8)]
@@ -138,7 +139,7 @@ public class UnitTests
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.AreEqual("FOO", result.ResultJtoken[0]["UPPER(name)"].ToString());
+        ClassicAssert.AreEqual("FOO", result.ResultJtoken[0]["UPPER(name)"].ToString());
     }
 
     [Test, Order(9)]
@@ -152,7 +153,7 @@ public class UnitTests
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.IsTrue(result.Success);
+        ClassicAssert.IsTrue(result.Success);
 
         var cq = new QueryInput
         {
@@ -161,8 +162,8 @@ public class UnitTests
         };
 
         var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
-        Assert.IsTrue(check.Success);
-        Assert.IsFalse(check.ResultJtoken.ToString().Contains("123"));
+        ClassicAssert.IsTrue(check.Success);
+        ClassicAssert.IsFalse(check.ResultJtoken.ToString().Contains("123"));
     }
 
     [Test, Order(10)]
@@ -176,7 +177,7 @@ public class UnitTests
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.IsTrue(result.Success);
+        ClassicAssert.IsTrue(result.Success);
 
         var cq = new QueryInput
         {
@@ -185,8 +186,8 @@ public class UnitTests
         };
 
         var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
-        Assert.IsTrue(check.Success);
-        Assert.IsTrue(check.ResultJtoken.ToString().Contains("newName"));
+        ClassicAssert.IsTrue(check.Success);
+        ClassicAssert.IsTrue(check.ResultJtoken.ToString().Contains("newName"));
     }
 
     [Test, Order(10)]
@@ -200,7 +201,7 @@ public class UnitTests
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.IsTrue(result.Success);
+        ClassicAssert.IsTrue(result.Success);
 
         var cq = new QueryInput
         {
@@ -209,8 +210,8 @@ public class UnitTests
         };
 
         var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
-        Assert.IsTrue(check.Success);
-        Assert.AreEqual(new JArray(), result.ResultJtoken);
+        ClassicAssert.IsTrue(check.Success);
+        ClassicAssert.AreEqual(new JArray(), result.ResultJtoken);
     }
 
     [Test, Order(11)]
@@ -230,8 +231,8 @@ public class UnitTests
         };
 
         var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
-        Assert.IsTrue(result.Success);
-        Assert.AreEqual(new JArray(), result.ResultJtoken);
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.AreEqual(new JArray(), result.ResultJtoken);
 
         var cq = new QueryInput
         {
@@ -240,8 +241,8 @@ public class UnitTests
         };
 
         var check = await MySQL.ExecuteQuery(cq, _options, new CancellationToken());
-        Assert.IsTrue(check.Success);
-        Assert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
+        ClassicAssert.IsTrue(check.Success);
+        ClassicAssert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
     }
 
     private static async Task<string> CreateConnectionString()
