@@ -43,7 +43,7 @@ public class MySQL
                     command.Parameters.Add(new MySqlParameter(parameter.Name, parameter.Value));
                 }
             }
-            command.CommandTimeout = command.CommandTimeout;
+            command.CommandTimeout = options.TimeoutSeconds;
 
             if (query.CommandText.ToString().ToLower().Contains("select"))
             {

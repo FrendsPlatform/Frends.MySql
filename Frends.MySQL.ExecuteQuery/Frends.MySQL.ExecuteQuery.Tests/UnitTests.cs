@@ -245,12 +245,36 @@ public class UnitTests
         ClassicAssert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
     }
 
+    [Test]
+    public async Task TimeoutShortQuery_ShouldThrow()
+    {
+        var options = new Options
+        {
+            TimeoutSeconds = 1,
+            MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.RepeatableRead
+        };
+
+        var q = new QueryInput
+        {
+            ConnectionString = await CreateConnectionString(),
+            CommandText = @"
+            SELECT SLEEP(1), 'row1'
+            UNION ALL
+            SELECT SLEEP(1), 'row2';"
+        };
+
+        var ex = Assert.ThrowsAsync<Exception>(async () =>
+            await MySQL.ExecuteQuery(q, options, CancellationToken.None));
+
+        ClassicAssert.That(ex!.Message, Does.Contain("timeout").IgnoreCase);
+    }
+
     private static async Task<string> CreateConnectionString()
     {
         MySqlConnectionStringBuilder conn_string = new()
         {
             Server = "127.0.0.1",
-            Port = 3306,
+            Port = 3307,
             UserID = "root",
             Password = "my-secret-pw",
         };
