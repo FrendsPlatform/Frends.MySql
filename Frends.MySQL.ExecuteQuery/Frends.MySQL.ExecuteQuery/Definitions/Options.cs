@@ -11,7 +11,7 @@ public class Options
     /// </summary>
     /// <example>30</example>
     [DefaultValue(30)]
-    public int TimeoutSeconds { get; set; }
+    public int TimeoutSeconds { get; set; } = 30;
 
     /// <summary>
     /// Transaction isolation level to use.

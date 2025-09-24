@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.3.0] - 2025-09-22
+### Fixed
+- Respect Options.TimeoutSeconds in MySql commands
+
 ## [1.2.0] - 2025-03-18
 ### Updated
 - Update packages:
