@@ -306,4 +306,144 @@ public class UnitTests
             await command.ExecuteNonQueryAsync();
         }
     }
+
+    [Test]
+    public async Task ShouldSuccess_ExecuteType_Auto_Select()
+    {
+        var q = new QueryInput
+        {
+            ConnectionString = await CreateConnectionString(),
+            CommandText = "select * from FooTest limit 2",
+            ExecuteType = ExecuteTypes.Auto
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.IsNotNull(result.ResultJtoken);
+        ClassicAssert.IsTrue(result.ResultJtoken.Type == JTokenType.Array);
+        ClassicAssert.GreaterOrEqual(((JArray)result.ResultJtoken).Count, 2);
+    }
+
+    [Test]
+    public async Task ShouldSuccess_ExecuteType_Auto_Insert()
+    {
+        string rndName = Path.GetRandomFileName();
+        Random rnd = new();
+        int rndValue = rnd.Next(1000);
+
+        var connectionstring = await CreateConnectionString();
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "insert into FooTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );",
+            ExecuteType = ExecuteTypes.Auto
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.IsNotNull(result.ResultJtoken);
+        ClassicAssert.AreEqual(1, (int)result.ResultJtoken);
+    }
+
+    [Test]
+    public async Task ShouldSuccess_ExecuteType_ExecuteReader()
+    {
+        var q = new QueryInput
+        {
+            ConnectionString = await CreateConnectionString(),
+            CommandText = "select * from FooTest limit 2",
+            ExecuteType = ExecuteTypes.ExecuteReader
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.IsNotNull(result.ResultJtoken);
+        ClassicAssert.IsTrue(result.ResultJtoken.Type == JTokenType.Array);
+        ClassicAssert.GreaterOrEqual(((JArray)result.ResultJtoken).Count, 2);
+    }
+
+    [Test]
+    public async Task ShouldSuccess_ExecuteType_NonQuery_Insert()
+    {
+        string rndName = Path.GetRandomFileName();
+        Random rnd = new();
+        int rndValue = rnd.Next(1000);
+
+        var connectionstring = await CreateConnectionString();
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "insert into FooTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );",
+            ExecuteType = ExecuteTypes.NonQuery
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.IsNotNull(result.ResultJtoken);
+        ClassicAssert.AreEqual(1, (int)result.ResultJtoken);
+    }
+
+    [Test]
+    public async Task ShouldSuccess_ExecuteType_NonQuery_Update()
+    {
+        var connectionstring = await CreateConnectionString();
+        
+        // First insert a row to update
+        string rndName = Path.GetRandomFileName();
+        Random rnd = new();
+        int rndValue = rnd.Next(1000);
+        
+        var insertQ = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "insert into FooTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );",
+            ExecuteType = ExecuteTypes.NonQuery
+        };
+        await MySQL.ExecuteQuery(insertQ, _options, new CancellationToken());
+
+        // Now update it
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "update FooTest set name = 'testUpdate' where value = " + rndValue,
+            ExecuteType = ExecuteTypes.NonQuery
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.IsNotNull(result.ResultJtoken);
+        ClassicAssert.AreEqual(1, (int)result.ResultJtoken);
+    }
+
+    [Test]
+    public async Task ShouldSuccess_ExecuteType_NonQuery_Delete()
+    {
+        var connectionstring = await CreateConnectionString();
+        
+        // First insert a row to delete
+        string rndName = Path.GetRandomFileName();
+        Random rnd = new();
+        int rndValue = rnd.Next(1000);
+        
+        var insertQ = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "insert into FooTest (name, value) values ( " + rndName.AddDoubleQuote() + " , " + rndValue + " );",
+            ExecuteType = ExecuteTypes.NonQuery
+        };
+        await MySQL.ExecuteQuery(insertQ, _options, new CancellationToken());
+
+        // Now delete it
+        var q = new QueryInput
+        {
+            ConnectionString = connectionstring,
+            CommandText = "delete from FooTest where value = " + rndValue,
+            ExecuteType = ExecuteTypes.NonQuery
+        };
+
+        var result = await MySQL.ExecuteQuery(q, _options, new CancellationToken());
+        ClassicAssert.IsTrue(result.Success);
+        ClassicAssert.IsNotNull(result.ResultJtoken);
+        ClassicAssert.AreEqual(1, (int)result.ResultJtoken);
+    }
 }

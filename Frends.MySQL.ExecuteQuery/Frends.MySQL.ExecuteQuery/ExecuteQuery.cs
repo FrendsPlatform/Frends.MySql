@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Frends.MySQL.ExecuteQuery;
 /// <summary>
 /// MySQL ExecuteQuery task.
 /// </summary>
-public class MySQL
+public static class MySQL
 {
     /// <summary>
     /// Execute queries against the MySql database and return result of query in JToken.
@@ -32,7 +33,7 @@ public class MySQL
 
             using var command = new MySqlCommand();
             command.Connection = conn;
-            command.CommandType = command.CommandType;
+            command.CommandType = CommandType.Text;
             command.CommandText = query.CommandText;
             if (query.Parameters != null)
             {
@@ -45,35 +46,127 @@ public class MySQL
             }
             command.CommandTimeout = options.TimeoutSeconds;
 
-            if (query.CommandText.ToString().ToLower().Contains("select"))
+            Result result;
+
+            // Execute command based on ExecuteType.
+            switch (query.ExecuteType)
             {
-                var isolationLevel = options.MySqlTransactionIsolationLevel switch
-                {
-                    MySqlTransactionIsolationLevel.ReadCommitted => IsolationLevel.ReadCommitted,
-                    MySqlTransactionIsolationLevel.ReadUncommitted => IsolationLevel.ReadUncommitted,
-                    MySqlTransactionIsolationLevel.RepeatableRead => IsolationLevel.RepeatableRead,
-                    MySqlTransactionIsolationLevel.Serializable => IsolationLevel.Serializable,
-                    _ => IsolationLevel.RepeatableRead,
-                };
+                case ExecuteTypes.Auto:
+                    // Auto-detect: Check if query returns data
+                    {
+                        var isolationLevel = GetIsolationLevel(options.MySqlTransactionIsolationLevel);
+                        using var transaction = await conn.BeginTransactionAsync(isolationLevel, cancellationToken);
+                        command.Transaction = transaction;
 
-                using var transaction = await conn.BeginTransactionAsync(isolationLevel, cancellationToken);
-                command.Transaction = transaction;
+                        using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+                        {
+                            // Check if the query returned any data (has columns)
+                            if (reader.FieldCount > 0)
+                            {
+                                // Query returned data (SELECT)
+                                result = new Result(true, reader.ToJson(cancellationToken));
+                            }
+                            else
+                            {
+                                // Query did not return data, use RecordsAffected
+                                result = new Result(true, JToken.FromObject(reader.RecordsAffected));
+                            }
+                        } // Reader is disposed here
 
-                using DataTable data = new();
-                using MySqlDataAdapter adapter = new(command);
-                adapter.Fill(data);
+                        await transaction.CommitAsync(cancellationToken);
+                    }
+                    break;
 
-                return new Result(true, JToken.FromObject(data));
+                case ExecuteTypes.ExecuteReader:
+                    // Explicitly return data
+                    {
+                        var isolationLevel = GetIsolationLevel(options.MySqlTransactionIsolationLevel);
+                        using var transaction = await conn.BeginTransactionAsync(isolationLevel, cancellationToken);
+                        command.Transaction = transaction;
+
+                        using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+                        {
+                            result = new Result(true, reader.ToJson(cancellationToken));
+                        } // Reader is disposed here
+
+                        await transaction.CommitAsync(cancellationToken);
+                    }
+                    break;
+
+                case ExecuteTypes.NonQuery:
+                    // Execute without returning data - use transaction
+                    {
+                        var isolationLevel = GetIsolationLevel(options.MySqlTransactionIsolationLevel);
+                        using var transaction = await conn.BeginTransactionAsync(isolationLevel, cancellationToken);
+                        command.Transaction = transaction;
+                        var rows = await command.ExecuteNonQueryAsync(cancellationToken);
+                        result = new Result(true, JToken.FromObject(rows));
+                        await transaction.CommitAsync(cancellationToken);
+                    }
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unsupported ExecuteType: {query.ExecuteType}");
             }
-            else
-            {
-                var result = await command.ExecuteNonQueryAsync(cancellationToken);
-                return new Result(true, JToken.FromObject(result));
-            }
+
+            return result;
         }
         catch (Exception ex)
         {
             throw new Exception(ex.Message);
         }
     }
+
+    #region HelperMethods
+
+    // Extension method for MySqlDataReader to read the data and return it as JToken.
+    private static JToken ToJson(this MySqlDataReader reader, CancellationToken cancellationToken)
+    {
+        // Create JSON result.
+        using (var writer = new JTokenWriter())
+        {
+            writer.Formatting = Newtonsoft.Json.Formatting.Indented;
+            writer.Culture = CultureInfo.InvariantCulture;
+
+            // Start array.
+            writer.WriteStartArray();
+
+            while (reader.Read())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                // Start row object.
+                writer.WriteStartObject();
+                for (var i = 0; i < reader.FieldCount; i++)
+                {
+                    // Add row element name.
+                    writer.WritePropertyName(reader.GetName(i));
+
+                    // Add row element value.
+                    writer.WriteValue(reader.GetValue(i) ?? string.Empty);
+                }
+
+                // End row object.
+                writer.WriteEndObject();
+            }
+            // End array.
+            writer.WriteEndArray();
+
+            return writer.Token;
+        }
+    }
+
+    // Determine transaction isolation level from Options-class.
+    private static IsolationLevel GetIsolationLevel(MySqlTransactionIsolationLevel level)
+    {
+        return level switch
+        {
+            MySqlTransactionIsolationLevel.ReadCommitted => IsolationLevel.ReadCommitted,
+            MySqlTransactionIsolationLevel.ReadUncommitted => IsolationLevel.ReadUncommitted,
+            MySqlTransactionIsolationLevel.RepeatableRead => IsolationLevel.RepeatableRead,
+            MySqlTransactionIsolationLevel.Serializable => IsolationLevel.Serializable,
+            _ => IsolationLevel.RepeatableRead,
+        };
+    }
+
+    #endregion
 }
