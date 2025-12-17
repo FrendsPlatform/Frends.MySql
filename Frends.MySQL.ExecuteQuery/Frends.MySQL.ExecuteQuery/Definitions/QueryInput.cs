@@ -28,6 +28,16 @@ public class QueryInput
     /// </summary>
     /// <example>foo, bar</example>
     public Parameter[] Parameters { get; set; }
+
+    /// <summary>
+    /// Specifies how a command string is interpreted.
+    /// Auto: Automatically detects if the query returns data (SELECT) and uses ExecuteReader, otherwise uses NonQuery.
+    /// ExecuteReader: Use this to execute queries that return a result set (SELECT).
+    /// NonQuery: Use this to execute commands that don't return a result set (INSERT, UPDATE, DELETE). Returns the number of affected rows.
+    /// </summary>
+    /// <example>ExecuteTypes.Auto</example>
+    [DefaultValue(ExecuteTypes.Auto)]
+    public ExecuteTypes ExecuteType { get; set; } = ExecuteTypes.Auto;
 }
 
 /// <summary>

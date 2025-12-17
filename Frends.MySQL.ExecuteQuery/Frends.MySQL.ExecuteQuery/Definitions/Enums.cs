@@ -25,3 +25,30 @@ public enum MySqlTransactionIsolationLevel
     /// </summary>
     Serializable
 }
+
+/// <summary>
+/// Specifies how a command string is interpreted.
+/// </summary>
+public enum ExecuteTypes
+{
+    /// <summary>
+    /// Auto-detect based on query structure.
+    /// Uses ExecuteReader for queries that return data (SELECT).
+    /// Uses NonQuery for INSERT, UPDATE, DELETE statements.
+    /// </summary>
+    Auto,
+
+    /// <summary>
+    /// Execute the query without expecting any result set.
+    /// Use for INSERT, UPDATE, DELETE statements.
+    /// Returns the number of rows affected.
+    /// </summary>
+    NonQuery,
+
+    /// <summary>
+    /// Execute the query and return the result set.
+    /// Use for SELECT queries.
+    /// Returns the data rows.
+    /// </summary>
+    ExecuteReader
+}
