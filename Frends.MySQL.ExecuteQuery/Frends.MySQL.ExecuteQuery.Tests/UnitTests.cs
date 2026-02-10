@@ -59,8 +59,11 @@ public class UnitTests
         await using var database = new MySqlCommand("use unittest", connection);
         await database.ExecuteNonQueryAsync();
 
-        // await using var command = new MySqlCommand("drop table FooTest", connection);
-        // await command.ExecuteNonQueryAsync();
+        await using var command = new MySqlCommand("drop table FooTest", connection);
+        await command.ExecuteNonQueryAsync();
+
+        command.CommandText = "drop table FooTest2";
+        await command.ExecuteNonQueryAsync();
     }
 
     [Test]
