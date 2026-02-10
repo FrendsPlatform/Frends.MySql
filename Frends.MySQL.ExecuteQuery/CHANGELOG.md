@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.0] - 2025-12-19
+### Fixed
+- Allow defining execute type.
+- Fix the issue with respecting timeout.
+
 ## [1.3.0] - 2025-09-22
 ### Fixed
 - Respect Options.TimeoutSeconds in MySql commands
