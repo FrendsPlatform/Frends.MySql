@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+
 namespace Frends.MySQL.ExecuteQuery.Definitions;
 
 /// <summary>
@@ -18,4 +19,11 @@ public class Options
     /// </summary>
     /// <example>Default</example>
     public MySqlTransactionIsolationLevel MySqlTransactionIsolationLevel { get; set; }
+
+    /// <summary>
+    /// Type of query execution.
+    /// </summary>
+    /// <example>Auto</example>
+    [DefaultValue(ExecuteType.Auto)]
+    public ExecuteType ExecuteType { get; set; } = ExecuteType.Auto;
 }

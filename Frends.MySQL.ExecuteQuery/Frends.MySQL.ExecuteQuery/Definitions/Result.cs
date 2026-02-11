@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace Frends.MySQL.ExecuteQuery.Definitions;
+﻿namespace Frends.MySQL.ExecuteQuery.Definitions;
 
 /// <summary>
 /// Result.
@@ -11,17 +9,12 @@ public class Result
     /// Task status.
     /// </summary>
     /// <example>true</example>
-    public bool Success { get; private set; }
+    public bool Success { get; set; }
 
     /// <summary>
     /// Result value(s).
     /// </summary>
     /// <example>[{"name": "foo", "value": 123}]</example>
-    public dynamic ResultJtoken { get; private set; }
+    public dynamic ResultJtoken { get; set; }
 
-    internal Result(bool success, JToken resultJtoken)
-    {
-        Success = success;
-        ResultJtoken = resultJtoken;
-    }
 }
