@@ -22,18 +22,20 @@ public static class MySQL
     /// [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure).
     /// </summary>
     /// <param name="input">Stored procedure parameters.</param>
+    /// <param name="connection">MySQL connection settings.</param>
     /// <param name="options">Additional execution options.</param>
     /// <param name="cancellationToken">A cancellation token provided by Frends Platform.</param>
     /// <returns>object { bool Success, int AffectedRows, object Error { string Message, Exception AdditionalInfo } }.</returns>
     public static async Task<Result> ExecuteProcedure(
         [PropertyTab] Input input,
+        [PropertyTab] Connection connection,
         [PropertyTab] Options options,
         CancellationToken cancellationToken)
     {
         try
         {
-            ValidationHandler.Run(input);
-            using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
+            ValidationHandler.Run(input, connection);
+            using (var conn = new MySqlConnection(connection.ConnectionString + "UseAffectedRows=true;"))
             {
                 await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
 

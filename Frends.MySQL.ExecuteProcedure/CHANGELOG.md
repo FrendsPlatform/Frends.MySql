@@ -5,6 +5,7 @@
 ### Changed
 
 - Updated the task to .NET 8.
+- **[Breaking Change]** Moved `Input.ConnectionString` to the new `Connection` tab.
 - **[Breaking Change]** Task now rethrows original exception instead of wrapping it in a new generic exception.
 
 ### Added

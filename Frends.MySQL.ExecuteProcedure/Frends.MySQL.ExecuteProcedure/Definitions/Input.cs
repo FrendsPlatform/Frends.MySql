@@ -9,15 +9,6 @@ namespace Frends.MySQL.ExecuteProcedure.Definitions;
 public class Input
 {
     /// <summary>
-    /// MySQL connection string
-    /// </summary>
-    /// <example>server=localhost;user=app;database=orders.</example>
-    [PasswordPropertyText]
-    [DefaultValue("server=localhost;user=app;database=orders.")]
-    [Required]
-    public string ConnectionString { get; set; }
-
-    /// <summary>
     /// The SQL statement or stored procedure name to execute.
     /// </summary>
     /// <example>SELECT OrderId FROM Orders WHERE OrderId = 1.</example>

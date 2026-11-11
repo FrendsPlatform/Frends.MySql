@@ -20,8 +20,11 @@ public class ErrorHandlingTests
     {
         var input = new Input
         {
-            ConnectionString = "not-a-valid-connection-string",
             Query = "ProcedureName",
+        };
+        var connection = new Connection
+        {
+            ConnectionString = "not-a-valid-connection-string",
         };
         var options = new Options
         {
@@ -29,7 +32,7 @@ public class ErrorHandlingTests
             ErrorMessageOnFailure = "Procedure execution failed",
         };
 
-        var result = await MySQL.ExecuteProcedure(input, options, CancellationToken.None);
+        var result = await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
 
         Assert.IsFalse(result.Success);
         Assert.IsNotNull(result.Error);

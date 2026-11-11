@@ -127,13 +127,13 @@ public class UnitTests
         {
             var input = new Input
             {
-                ConnectionString = connectionString,
                 Query = @"UpdateHodorTest",
             };
+            var connection = new Connection { ConnectionString = connectionString };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
 
-            var result = await MySQL.ExecuteProcedure(input, options, CancellationToken.None);
+            var result = await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
             Assert.AreEqual(1, result.AffectedRows);
         }
 
@@ -160,14 +160,14 @@ public class UnitTests
 
             var input = new Input
             {
-                ConnectionString = connectionString,
                 Query = @"InsertHodorTest",
                 Parameters = parameters,
             };
+            var connection = new Connection { ConnectionString = connectionString };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
 
-            var result = await MySQL.ExecuteProcedure(input, options, CancellationToken.None);
+            var result = await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
             Assert.AreEqual(1, result.AffectedRows);
         }
 
@@ -181,12 +181,12 @@ public class UnitTests
         {
             var input = new Input
             {
-                ConnectionString = connectionString,
                 Query = @"call UpdateHodorTest00",
             };
+            var connection = new Connection { ConnectionString = connectionString };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
-            await MySQL.ExecuteProcedure(input, options, CancellationToken.None);
+            await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
         }
 
         /// <summary>
@@ -197,14 +197,14 @@ public class UnitTests
         [ExpectedException(typeof(Exception))]
         public async Task TestThrowCallStoredProcedure_InvalidConnectionString()
         {
+            var connection = new Connection { ConnectionString = "server=invalid;uid=invalid;pwd=test;database=invalid;" };
             var input = new Input
             {
-                ConnectionString = "server=invalid;uid=invalid;pwd=test;database=invalid;",
                 Query = @"UpdateHodorTest",
             };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
-            await MySQL.ExecuteProcedure(input, options, CancellationToken.None);
+            await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
         }
 
         /// <summary>
@@ -217,12 +217,12 @@ public class UnitTests
         {
             var input = new Input
             {
-                ConnectionString = string.Empty,
                 Query = @"UpdateHodorTest",
             };
+            var connection = new Connection { ConnectionString = string.Empty };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
-            await MySQL.ExecuteProcedure(input, options, CancellationToken.None);
+            await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
         }
 
         /// <summary>
@@ -233,14 +233,14 @@ public class UnitTests
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task TestThrowCallStoredProcedure_EmptyQuery()
         {
+            var connection = new Connection { ConnectionString = "server=invalid;uid=invalid;pwd=test;database=invalid;" };
             var input = new Input
             {
-                ConnectionString = "server=invalid;uid=invalid;pwd=test;database=invalid;",
                 Query = string.Empty,
             };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
-            await MySQL.ExecuteProcedure(input, options, CancellationToken.None);
+            await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
         }
     }
 }
