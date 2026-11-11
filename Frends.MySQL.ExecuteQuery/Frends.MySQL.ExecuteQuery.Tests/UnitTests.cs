@@ -14,15 +14,14 @@ namespace Frends.MySQL.ExecuteQuery.Tests;
 [TestFixture]
 public class UnitTests
 {
-    private static Options options;
-
     private const string DbConnectionString =
         "Server=127.0.0.1;Port=3306;User ID=root;Password=my-secret-pw;Database=unittest";
 
     private const string ServerConnectionString = "Server=127.0.0.1;Port=3306;User ID=root;Password=my-secret-pw";
     private static readonly string Newline = Environment.NewLine;
-    private static QueryInput queryInput;
-
+    private static Options options;
+    private static Input queryInput;
+    private static Connection connectionInput;
 
     [SetUp]
     public static async Task PrepareDb()
@@ -30,11 +29,13 @@ public class UnitTests
         options = new Options
         {
             TimeoutSeconds = 300,
-            MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.RepeatableRead
+            MySqlTransactionIsolationLevel = MySqlTransactionIsolationLevel.RepeatableRead,
+            ThrowErrorOnFailure = true,
         };
-        queryInput = new QueryInput
+        queryInput = new Input();
+        connectionInput = new Connection
         {
-            ConnectionString = DbConnectionString
+            ConnectionString = DbConnectionString,
         };
         await using var connection = new MySqlConnection(ServerConnectionString);
         await connection.OpenAsync();
@@ -72,7 +73,7 @@ public class UnitTests
         queryInput.CommandText = "select * from FooTest limit 2";
         var expect =
             $"[{Newline}  {{{Newline}    \"name\": \"foo\",{Newline}    \"value\": 123{Newline}  }},{Newline}  {{{Newline}    \"name\": \"bar\",{Newline}    \"value\": 321{Newline}  }}{Newline}]";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.AreEqual(expect.Replace(@"\n\r", @"\n"), result.ResultJtoken.ToString());
     }
 
@@ -84,7 +85,7 @@ public class UnitTests
 
         var expect =
             $"[{Newline}  {{{Newline}    \"Tables_in_unittest\": \"FooTest\"{Newline}  }},{Newline}  {{{Newline}    \"Tables_in_unittest\": \"FooTest2\"{Newline}  }}{Newline}]";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.AreEqual(expect.Replace(@"\n\r", @"\n"), result.ResultJtoken.ToString());
     }
 
@@ -94,7 +95,7 @@ public class UnitTests
         queryInput.CommandText = "SELECT SUM(value) FROM FooTest;";
         options.ExecuteType = ExecuteType.Scalar;
         const string expect = "444";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.AreEqual(expect.Replace(@"\n\r", @"\n"), result.ResultJtoken.ToString());
     }
 
@@ -105,7 +106,7 @@ public class UnitTests
         options.ExecuteType = ExecuteType.NonQuery;
 
         var expect = $"{{{Newline}  \"AffectedRows\": 2{Newline}}}";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.AreEqual(expect.Replace(@"\n\r", @"\n"), result.ResultJtoken.ToString());
     }
 
@@ -113,7 +114,7 @@ public class UnitTests
     public void ShouldThrowException_DoBasicQuery()
     {
         queryInput.CommandText = "select * from tablex limit 2";
-        var ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, options, CancellationToken.None));
+        var ex = Assert.CatchAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
         ClassicAssert.IsTrue(ex.Message.Contains("Table 'unittest.tablex' doesn't exist"));
     }
 
@@ -126,12 +127,12 @@ public class UnitTests
 
         queryInput.CommandText =
             $"insert into FooTest (name, value) values ( {rndName.AddDoubleQuote()}, {rndValue} );";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(result.Success);
         ClassicAssert.AreEqual(new JArray(), result.ResultJtoken);
 
         queryInput.CommandText = "select * from FooTest;";
-        var check = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var check = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(check.Success);
         ClassicAssert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
     }
@@ -141,27 +142,27 @@ public class UnitTests
     {
         queryInput.CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 ";
         var expect = new JObject(new JProperty("value", 123));
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.AreEqual(expect["value"], result.ResultJtoken[0]["value"]);
     }
 
     [Test]
     public void ShouldThrowException_FaultyConnectionString()
     {
-        queryInput.ConnectionString =
+        connectionInput.ConnectionString =
             "Server=127.0.0.1;Port=3306;User ID=root;Password=my-secret-pw;Database=invalid;";
         queryInput.CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 ";
-        var ex = Assert.ThrowsAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, options, CancellationToken.None));
+        var ex = Assert.CatchAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
         Assert.That(ex, Is.Not.Null);
-        ClassicAssert.AreEqual("Unknown database 'invalid'", ex.Message);
+        Assert.That(ex.Message, Is.EqualTo("Unknown database 'invalid'"));
     }
 
     [Test]
     public void ShouldThrowException_CancellationRequested()
     {
         queryInput.CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 ";
-        var ex = Assert.ThrowsAsync<Exception>(() =>
-            MySQL.ExecuteQuery(queryInput, options, new CancellationToken(true)));
+        var ex = Assert.CatchAsync<Exception>(() =>
+            MySQL.ExecuteQuery(queryInput, connectionInput, options, new CancellationToken(true)));
         Assert.That(ex, Is.Not.Null);
     }
 
@@ -169,7 +170,7 @@ public class UnitTests
     public async Task ShouldSuccess_DoBasicScalar()
     {
         queryInput.CommandText = "SELECT UPPER(name) FROM FooTest";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.AreEqual("FOO", result.ResultJtoken[0]["UPPER(name)"].ToString());
     }
 
@@ -177,11 +178,11 @@ public class UnitTests
     public async Task ShouldSuccess_DoBasicDelete()
     {
         queryInput.CommandText = "delete from FooTest where value = 123";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(result.Success);
 
         queryInput.CommandText = "select * from FooTest;";
-        var check = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var check = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(check.Success);
         ClassicAssert.IsFalse(check.ResultJtoken.ToString().Contains("123"));
     }
@@ -190,11 +191,11 @@ public class UnitTests
     public async Task ShouldSuccess_DoBasicUpdate()
     {
         queryInput.CommandText = "update FooTest set name = 'newName' where value = 123";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(result.Success);
 
         queryInput.CommandText = "select * from FooTest;";
-        var check = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var check = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(check.Success);
         ClassicAssert.IsTrue(check.ResultJtoken.ToString().Contains("newName"));
     }
@@ -203,11 +204,11 @@ public class UnitTests
     public async Task ShouldSuccess_DoTruncate()
     {
         queryInput.CommandText = "truncate FooTest";
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(result.Success);
 
         queryInput.CommandText = "select * from FooTest;";
-        var check = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var check = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(check.Success);
         ClassicAssert.AreEqual(new JArray(), result.ResultJtoken);
     }
@@ -225,20 +226,20 @@ public class UnitTests
             new()
             {
                 Name = "@rndName",
-                Value = rndName.AddDoubleQuote()
+                Value = rndName.AddDoubleQuote(),
             },
             new()
             {
                 Name = "@rndValue",
-                Value = rndValue
-            }
+                Value = rndValue,
+            },
         };
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(result.Success);
         ClassicAssert.AreEqual(new JArray(), result.ResultJtoken);
 
         queryInput.CommandText = "select * from FooTest;";
-        var check = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var check = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         ClassicAssert.IsTrue(check.Success);
         ClassicAssert.IsTrue(check.ResultJtoken.ToString().Contains(rndName));
     }
@@ -251,8 +252,8 @@ public class UnitTests
             SELECT SLEEP(1), 'row1'
             UNION ALL
             SELECT SLEEP(1), 'row2';";
-        var ex = Assert.ThrowsAsync<Exception>(async () =>
-            await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None));
+        var ex = Assert.CatchAsync<Exception>(async () =>
+            await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
 
         Assert.That(ex!.Message, Does.Contain("timeout").IgnoreCase);
     }
@@ -265,14 +266,33 @@ public class UnitTests
             SELECT SLEEP(35), 'row1'
             UNION ALL
             SELECT SLEEP(35), 'row2';";
-        var ex = Assert.ThrowsAsync<Exception>(async () =>
+        var ex = Assert.CatchAsync<Exception>(async () =>
         {
-            await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+            await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         });
         Assert.That(ex!.Message, Does.Contain("timeout").IgnoreCase);
 
         options.TimeoutSeconds = 3601;
-        var result = await MySQL.ExecuteQuery(queryInput, options, CancellationToken.None);
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         Assert.That(result.Success, Is.True);
+    }
+
+    [Test]
+    public async Task ShouldReturnError_WhenThrowErrorOnFailureIsFalse()
+    {
+        options.ThrowErrorOnFailure = false;
+        queryInput.CommandText = "select * from tablex limit 2";
+        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.Error.Message, Does.Contain("Table 'unittest.tablex' doesn't exist"));
+    }
+
+    [Test]
+    public void ShouldUseCustomErrorMessage_WhenThrowErrorOnFailureIsTrue()
+    {
+        options.ErrorMessageOnFailure = "Custom error";
+        queryInput.CommandText = "select * from tablex limit 2";
+        var ex = Assert.CatchAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
+        Assert.That(ex.Message, Is.EqualTo("Custom error"));
     }
 }
