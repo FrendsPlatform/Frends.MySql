@@ -1,5 +1,3 @@
-﻿using Frends.MySQL.ExecuteProcedure.Definitions;
-using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,34 +6,36 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Frends.MySQL.ExecuteProcedure.Definitions;
+using Frends.MySQL.ExecuteProcedure.Helpers;
+using MySql.Data.MySqlClient;
 
 namespace Frends.MySQL.ExecuteProcedure;
 
 /// <summary>
-/// Task class.
+/// The MySQL ExecuteProcedure task.
 /// </summary>
-public class MySQL
+public static class MySQL
 {
     /// <summary>
-    /// Execute a stored procedure to MySQL.
-    /// [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure)
+    /// Executes a stored procedure in MySQL.
+    /// [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure).
     /// </summary>
-    /// <param name="input"></param>
-    /// <param name="options"></param>
-    /// <param name="cancellationToken"/>
-    /// <returns>Object { int AffectedRows }</returns>
+    /// <param name="input">Stored procedure parameters.</param>
+    /// <param name="connection">MySQL connection settings.</param>
+    /// <param name="options">Additional execution options.</param>
+    /// <param name="cancellationToken">A cancellation token provided by Frends Platform.</param>
+    /// <returns>object { bool Success, int AffectedRows, object Error { string Message, Exception AdditionalInfo } }.</returns>
     public static async Task<Result> ExecuteProcedure(
         [PropertyTab] Input input,
+        [PropertyTab] Connection connection,
         [PropertyTab] Options options,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        if(string.IsNullOrWhiteSpace(input.ConnectionString)) throw new ArgumentNullException("Connection string cannot be empty.", nameof(input.ConnectionString));
-        if (string.IsNullOrWhiteSpace(input.Query)) throw new ArgumentNullException("Query cannot be empty.", nameof(input.Query));
-
         try
         {
-            using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
+            ValidationHandler.Run(input, connection);
+            using (var conn = new MySqlConnection(connection.ConnectionString + "UseAffectedRows=true;"))
             {
                 await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
 
@@ -68,28 +68,17 @@ public class MySQL
 
                     using (var trans = conn.BeginTransaction(isolationLevel))
                     {
-                        try
-                        {
-                            var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
-                            trans.Commit();
+                        var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
+                        trans.Commit();
 
-                            return new Result(affectedRows);
-                        }
-                        catch (Exception ex)
-                        {
-                            trans.Rollback();
-                            trans.Dispose();
-
-                            throw new Exception("Query failed " + ex.Message);
-                        }
+                        return new Result(affectedRows);
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            return ex.Handle(options);
         }
     }
-
 }
