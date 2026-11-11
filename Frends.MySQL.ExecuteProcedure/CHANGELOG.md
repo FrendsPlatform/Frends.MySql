@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.0] - 2026-11-11
+### Changed
+- **[Breaking Change]** Updated the task to .NET 8 and added standardized success and error results with configurable failure handling.
+
 ## [1.1.0] - 2025-02-18
 ### Changed
 - Update packages:
