@@ -1,8 +1,16 @@
 # Changelog
 
 ## [2.0.0] - 2026-11-11
+
 ### Changed
-- **[Breaking Change]** Updated the task to .NET 8 and added standardized success and error results with configurable failure handling.
+
+- Updated the task to .NET 8.
+- **[Breaking Change]** Task now rethrows original exception instead of wrapping it in a new generic exception.
+
+### Added
+
+- Added standardized success and error results.
+- Add `Options.ThrowErrorOnFailure` and `Options.ErrorMessageOnFailure` for configurable failure handling.
 
 ## [1.1.0] - 2025-02-18
 ### Changed

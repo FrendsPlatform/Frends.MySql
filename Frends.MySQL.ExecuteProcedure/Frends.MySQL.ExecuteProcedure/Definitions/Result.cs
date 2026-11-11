@@ -1,4 +1,4 @@
-namespace Frends.MySQL.ExecuteProcedure.Definitions;
+﻿namespace Frends.MySQL.ExecuteProcedure.Definitions;
 
 /// <summary>
 /// Result of the task.
@@ -12,20 +12,20 @@ public class Result
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the task completed successfully.
+    /// Value indicating whether the task completed successfully.
     /// </summary>
     /// <example>true.</example>
     public bool Success { get; set; }
 
     /// <summary>
-    /// Gets the count of affected rows.
+    /// Count of affected rows.
     /// </summary>
     /// <example>10.</example>
     public int AffectedRows { get; private set; }
 
     /// <summary>
-    /// Gets or sets the error that occurred during task execution.
+    /// Error that occurred during task execution.
     /// </summary>
-    /// <example>null.</example>
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
     public Error Error { get; set; }
 }

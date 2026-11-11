@@ -30,11 +30,9 @@ public static class MySQL
         [PropertyTab] Options options,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(input.ConnectionString)) throw new ArgumentNullException("Connection string cannot be empty.", nameof(input.ConnectionString));
-        if (string.IsNullOrWhiteSpace(input.Query)) throw new ArgumentNullException("Query cannot be empty.", nameof(input.Query));
-
         try
         {
+            ValidationHandler.Run(input);
             using (var conn = new MySqlConnection(input.ConnectionString + "UseAffectedRows=true;"))
             {
                 await conn.OpenAsync(cancellationToken).ConfigureAwait(false);

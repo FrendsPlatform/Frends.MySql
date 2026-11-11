@@ -8,14 +8,14 @@ namespace Frends.MySQL.ExecuteProcedure.Definitions;
 public class Error
 {
     /// <summary>
-    /// Gets or sets a summary of the error.
+    /// Summary of the error.
     /// </summary>
-    /// <example>Stored procedure execution failed.</example>
+    /// <example>Unable to join strings.</example>
     public string Message { get; set; }
 
     /// <summary>
-    /// Gets or sets additional information about the error.
+    /// Additional information about the error.
     /// </summary>
-    /// <example>MySqlException: Procedure was not found.</example>
+    /// <example>object { Exception AdditionalInfo }</example>
     public Exception AdditionalInfo { get; set; }
 }

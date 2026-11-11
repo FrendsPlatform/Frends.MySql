@@ -9,7 +9,7 @@ namespace Frends.MySQL.ExecuteProcedure.Definitions;
 public class Parameter
 {
     /// <summary>
-    /// Gets or sets the name of the parameter.
+    /// The name of the parameter
     /// </summary>
     /// <example>CustomerId.</example>
     [DefaultValue("ParameterName")]
@@ -17,7 +17,7 @@ public class Parameter
     public string Name { get; set; }
 
     /// <summary>
-    /// Gets or sets the value of the parameter.
+    /// The value of the parameter
     /// </summary>
     /// <example>123.</example>
     [DefaultValue("ParameterValue")]

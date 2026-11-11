@@ -6,8 +6,7 @@ Frends Task for Executing a Procedure in MySQL.
 ![MyGet](https://img.shields.io/myget/frends-tasks/v/Frends.MySQL.ExecuteProcedure)
 ![Coverage](https://app-github-custom-badges.azurewebsites.net/Badge?key=FrendsPlatform/Frends.MySQL/Frends.MySQL.ExecuteProcedure|main)
 
-Returns the execution status, affected row count, and any error details.
-Set `ThrowErrorOnFailure` to `false` to return errors in the result instead of throwing them.
+Returns the count of affected rows.
 
 ## Installing
 
