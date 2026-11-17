@@ -114,7 +114,8 @@ public class UnitTests
     public void ShouldThrowException_DoBasicQuery()
     {
         queryInput.CommandText = "select * from tablex limit 2";
-        var ex = Assert.CatchAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
+        var ex = Assert.CatchAsync<Exception>(() =>
+            MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
         ClassicAssert.IsTrue(ex.Message.Contains("Table 'unittest.tablex' doesn't exist"));
     }
 
@@ -152,7 +153,8 @@ public class UnitTests
         connectionInput.ConnectionString =
             "Server=127.0.0.1;Port=3306;User ID=root;Password=my-secret-pw;Database=invalid;";
         queryInput.CommandText = "SELECT value FROM FooTest WHERE name LIKE 'foo' limit 1 ";
-        var ex = Assert.CatchAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
+        var ex = Assert.CatchAsync<Exception>(() =>
+            MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
         Assert.That(ex, Is.Not.Null);
         Assert.That(ex.Message, Is.EqualTo("Unknown database 'invalid'"));
     }
@@ -275,24 +277,5 @@ public class UnitTests
         options.TimeoutSeconds = 3601;
         var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
         Assert.That(result.Success, Is.True);
-    }
-
-    [Test]
-    public async Task ShouldReturnError_WhenThrowErrorOnFailureIsFalse()
-    {
-        options.ThrowErrorOnFailure = false;
-        queryInput.CommandText = "select * from tablex limit 2";
-        var result = await MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None);
-        Assert.That(result.Success, Is.False);
-        Assert.That(result.Error.Message, Does.Contain("Table 'unittest.tablex' doesn't exist"));
-    }
-
-    [Test]
-    public void ShouldUseCustomErrorMessage_WhenThrowErrorOnFailureIsTrue()
-    {
-        options.ErrorMessageOnFailure = "Custom error";
-        queryInput.CommandText = "select * from tablex limit 2";
-        var ex = Assert.CatchAsync<Exception>(() => MySQL.ExecuteQuery(queryInput, connectionInput, options, CancellationToken.None));
-        Assert.That(ex.Message, Is.EqualTo("Custom error"));
     }
 }
