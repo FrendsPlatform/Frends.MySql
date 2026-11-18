@@ -1,24 +1,27 @@
-﻿namespace Frends.MySQL.ExecuteProcedure.Definitions;
+namespace Frends.MySQL.ExecuteProcedure.Definitions;
 
 /// <summary>
-/// Transaction isolation level
+/// Transaction isolation level.
 /// </summary>
 public enum TransactionIsolationLevel
 {
     /// <summary>
-    /// Uses ReadCommited level of transaction
+    /// Uses the ReadCommitted transaction isolation level.
     /// </summary>
     ReadCommitted,
+
     /// <summary>
-    /// Uses Serializable level of transaction
+    /// Uses the Serializable transaction isolation level.
     /// </summary>
     Serializable,
+
     /// <summary>
-    /// Uses ReadUncommitted level of transaction
+    /// Uses the ReadUncommitted transaction isolation level.
     /// </summary>
     ReadUncommitted,
+
     /// <summary>
-    /// Uses RepeatableRead level of transaction
+    /// Uses the RepeatableRead transaction isolation level.
     /// </summary>
-    RepeatableRead
+    RepeatableRead,
 }

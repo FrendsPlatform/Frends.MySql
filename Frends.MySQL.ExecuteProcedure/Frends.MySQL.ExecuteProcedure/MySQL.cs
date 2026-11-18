@@ -1,0 +1,84 @@
+using System;
+using System.ComponentModel;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using Frends.MySQL.ExecuteProcedure.Definitions;
+using Frends.MySQL.ExecuteProcedure.Helpers;
+using MySql.Data.MySqlClient;
+
+namespace Frends.MySQL.ExecuteProcedure;
+
+/// <summary>
+/// The MySQL ExecuteProcedure task.
+/// </summary>
+public static class MySQL
+{
+    /// <summary>
+    /// Executes a stored procedure in MySQL.
+    /// [Documentation](https://tasks.frends.com/tasks#frends-tasks/Frends.MySQL.ExecuteProcedure).
+    /// </summary>
+    /// <param name="input">Stored procedure parameters.</param>
+    /// <param name="connection">MySQL connection settings.</param>
+    /// <param name="options">Additional execution options.</param>
+    /// <param name="cancellationToken">A cancellation token provided by Frends Platform.</param>
+    /// <returns>object { bool Success, int AffectedRows, object Error { string Message, Exception AdditionalInfo } }.</returns>
+    public static async Task<Result> ExecuteProcedure(
+        [PropertyTab] Input input,
+        [PropertyTab] Connection connection,
+        [PropertyTab] Options options,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            ValidationHandler.Run(input, connection);
+            using (var conn = new MySqlConnection(connection.ConnectionString + "UseAffectedRows=true;"))
+            {
+                await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+                using (var command = new MySqlCommand(input.Query, conn))
+                {
+                    command.CommandTimeout = options.TimeoutSeconds;
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    if (input.Parameters != null)
+                    {
+                        foreach (var parameter in input.Parameters)
+                        {
+                            command.Parameters.AddWithValue(parameter.Name, parameter.Value);
+                        }
+                    }
+
+                    IsolationLevel isolationLevel;
+                    switch (options.TransactionIsolationLevel)
+                    {
+                        case TransactionIsolationLevel.ReadCommitted:
+                            isolationLevel = IsolationLevel.ReadCommitted;
+                            break;
+                        case TransactionIsolationLevel.ReadUncommitted:
+                            isolationLevel = IsolationLevel.ReadUncommitted;
+                            break;
+                        case TransactionIsolationLevel.Serializable:
+                            isolationLevel = IsolationLevel.Serializable;
+                            break;
+                        default:
+                            isolationLevel = IsolationLevel.RepeatableRead;
+                            break;
+                    }
+
+                    using (var trans = conn.BeginTransaction(isolationLevel))
+                    {
+                        var affectedRows = await command.ExecuteNonQueryAsync(cancellationToken);
+                        trans.Commit();
+
+                        return new Result(affectedRows);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            return ex.Handle(options);
+        }
+    }
+}
