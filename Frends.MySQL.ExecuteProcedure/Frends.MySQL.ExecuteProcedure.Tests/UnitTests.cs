@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 using Frends.MySQL.ExecuteProcedure.Definitions;
@@ -22,6 +23,8 @@ public class UnitTests
         private readonly string connectionString = "server=127.0.0.1;uid=root;pwd=my-secret-pw;";
         private Options options;
 
+        private string DatabaseConnectionString => connectionString + "database=MySQLProcedureTest;";
+
         /// <summary>
         /// Creates the database objects used by the integration tests.
         /// </summary>
@@ -38,16 +41,20 @@ public class UnitTests
             {
                 await connection.OpenAsync();
 
-                using (var command = new MySqlCommand("CREATE DATABASE IF NOT EXISTS MySQLProcedureTest;", connection))
+                using (var command = new MySqlCommand("DROP DATABASE IF EXISTS MySQLProcedureTest;", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
 
-                using (var command = new MySqlCommand("USE MySQLProcedureTest;", connection))
+                using (var command = new MySqlCommand("CREATE DATABASE MySQLProcedureTest;", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
+            }
 
+            using (var connection = new MySqlConnection(DatabaseConnectionString))
+            {
+                await connection.OpenAsync();
                 using (var command = new MySqlCommand("CREATE TABLE IF NOT EXISTS DecimalTest(DecimalValue decimal(38,30))", connection))
                 {
                     await command.ExecuteNonQueryAsync();
@@ -91,27 +98,7 @@ public class UnitTests
             {
                 await connection.OpenAsync();
 
-                using (var command = new MySqlCommand("DROP PROCEDURE UpdateHodorTest;", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                using (var command = new MySqlCommand("DROP PROCEDURE InsertHodorTest;", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                using (var command = new MySqlCommand("DROP TABLE HodorTest", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                using (var command = new MySqlCommand("DROP TABLE DecimalTest", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                using (var command = new MySqlCommand("DROP DATABASE MySQLProcedureTest;", connection))
+                using (var command = new MySqlCommand("DROP DATABASE IF EXISTS MySQLProcedureTest;", connection))
                 {
                     await command.ExecuteNonQueryAsync();
                 }
@@ -129,7 +116,7 @@ public class UnitTests
             {
                 Query = @"UpdateHodorTest",
             };
-            var connection = new Connection { ConnectionString = connectionString };
+            var connection = new Connection { ConnectionString = DatabaseConnectionString };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
 
@@ -146,13 +133,13 @@ public class UnitTests
         {
             var parameterName = new Parameter
             {
-                Name = "Name",
+                Name = "name",
                 Value = "TestName",
             };
 
             var parameterValue = new Parameter
             {
-                Name = "Value",
+                Name = "value",
                 Value = "123",
             };
 
@@ -163,7 +150,7 @@ public class UnitTests
                 Query = @"InsertHodorTest",
                 Parameters = parameters,
             };
-            var connection = new Connection { ConnectionString = connectionString };
+            var connection = new Connection { ConnectionString = DatabaseConnectionString };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
 
@@ -176,14 +163,14 @@ public class UnitTests
         /// </summary>
         /// <returns>A task that represents the asynchronous test operation.</returns>
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(MySqlException))]
         public async Task TestThrowCallStoredProcedureAsync_InvalidQuery()
         {
             var input = new Input
             {
-                Query = @"call UpdateHodorTest00",
+                Query = @"UpdateHodorTest00",
             };
-            var connection = new Connection { ConnectionString = connectionString };
+            var connection = new Connection { ConnectionString = DatabaseConnectionString };
 
             options.TransactionIsolationLevel = TransactionIsolationLevel.RepeatableRead;
             await MySQL.ExecuteProcedure(input, connection, options, CancellationToken.None);
@@ -194,7 +181,7 @@ public class UnitTests
         /// </summary>
         /// <returns>A task that represents the asynchronous test operation.</returns>
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(MySqlException))]
         public async Task TestThrowCallStoredProcedure_InvalidConnectionString()
         {
             var connection = new Connection { ConnectionString = "server=invalid;uid=invalid;pwd=test;database=invalid;" };
@@ -212,7 +199,7 @@ public class UnitTests
         /// </summary>
         /// <returns>A task that represents the asynchronous test operation.</returns>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(ValidationException))]
         public async Task TestThrowCallStoredProcedure_EmptyConnectionString()
         {
             var input = new Input
@@ -230,7 +217,7 @@ public class UnitTests
         /// </summary>
         /// <returns>A task that represents the asynchronous test operation.</returns>
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(ValidationException))]
         public async Task TestThrowCallStoredProcedure_EmptyQuery()
         {
             var connection = new Connection { ConnectionString = "server=invalid;uid=invalid;pwd=test;database=invalid;" };
