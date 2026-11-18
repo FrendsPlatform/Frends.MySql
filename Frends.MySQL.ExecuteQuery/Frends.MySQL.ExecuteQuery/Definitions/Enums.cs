@@ -1,4 +1,4 @@
-﻿namespace Frends.MySQL.ExecuteQuery.Definitions;
+namespace Frends.MySQL.ExecuteQuery.Definitions;
 
 /// <summary>
 /// MySql transaction isolation levels.
@@ -23,5 +23,5 @@ public enum MySqlTransactionIsolationLevel
     /// <summary>
     /// This level is like REPEATABLE READ, but InnoDB implicitly converts all plain SELECT statements to SELECT ... FOR SHARE if autocommit is disabled. If autocommit is enabled, the SELECT is its own transaction. It therefore is known to be read only and can be serialized if performed as a consistent (nonlocking) read and need not block for other transactions. (To force a plain SELECT to block if other transactions have modified the selected rows, disable autocommit.)
     /// </summary>
-    Serializable
+    Serializable,
 }

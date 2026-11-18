@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0] - 2026-11-11
+### Changed
+- **[Breaking Change]** Moved `ConnectionString` from `Input` to a new `Connection` parameter. The task now takes `Input`, `Connection` and `Options` parameters.
+- **[Breaking Change]** Renamed the `QueryInput` parameter to `Input`.
+- **[Breaking Change]** Errors are now handled according to the new `Options.ThrowErrorOnFailure` setting, and the original exception is thrown instead of a wrapped one.
+- Added `Options.ThrowErrorOnFailure` (default `true`) and `Options.ErrorMessageOnFailure` for customizing error handling.
+- Added `Error` to the task result, which is populated when the task fails and `ThrowErrorOnFailure` is `false`.
+- Updated the task to target .NET 8.
+
 ## [1.4.0] - 2025-12-19
 ### Fixed
 - Allow defining execute type.

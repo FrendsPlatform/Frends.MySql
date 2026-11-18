@@ -1,4 +1,4 @@
-﻿namespace Frends.MySQL.ExecuteQuery.Definitions;
+namespace Frends.MySQL.ExecuteQuery.Definitions;
 
 /// <summary>
 /// Result.
@@ -17,4 +17,9 @@ public class Result
     /// <example>[{"name": "foo", "value": 123}]</example>
     public dynamic ResultJtoken { get; set; }
 
+    /// <summary>
+    /// Error that occurred during task execution.
+    /// </summary>
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; set; }
 }
